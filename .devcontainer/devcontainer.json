@@ -1,0 +1,66 @@
+{
+  "name": "Apiist",
+  "dockerComposeFile": [
+    "../docker-compose.yml",
+    "docker-compose.yml"
+  ],
+  "service": "devenv",
+  "workspaceFolder": "/home/app",
+  "shutdownAction": "stopCompose",
+  "postCreateCommand": "cd dev_env/gitutils && ./install.sh && git config --global pull.rebase true",
+  "extensions": [
+	"ms-python.vscode-pylance",
+	"visualstudioexptteam.vscodeintellicode",
+	"redhat.vscode-yaml",
+	"ryanluker.vscode-coverage-gutters",
+	"oderwat.indent-rainbow",
+	"mikestead.dotenv",
+	"alanwalk.markdown-toc",
+	"darkriszty.markdown-table-prettify",
+	"ms-python.python",
+	"2gua.rainbow-brackets",
+	"brainfit.vscode-importmagic",
+	"littlefoxteam.vscode-python-test-adapter",
+	"davidanson.vscode-markdownlint",
+	"eamodio.gitlens",
+	"shakram02.bash-beautify",
+	"markis.code-coverage",
+	"VisualStudioExptTeam.vscodeintellicode",
+	"hbenl.vscode-test-explorer"
+],
+  "settings": {
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.enabled": true,
+    "python.formatting.provider": "black",
+    "python.testing.pytestArgs": [],
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "files.trimTrailingWhitespace": true,
+    "terminal.integrated.profiles.linux": {
+      "zsh": {
+        "path": "/usr/bin/zsh",
+        "args": ["-l"]
+      }
+    },
+
+    "python.linting.banditEnabled": true,
+    "python.formatting.blackArgs": ["--line-length=99"],
+    "coverage-gutters.coverageReportFileName": "coverage/index.html",
+    "coverage-gutters.showLineCoverage": true,
+    "coverage-gutters.showRulerCoverage": true,
+    "python.testing.pytestEnabled": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.languageServer": "Pylance",
+    "python.analysis.autoImportCompletions": true,
+    "[python]": {
+      "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+      }
+    },
+    "files.eol": "\n"
+
+  }
+}

@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  devenv:
+    build:
+      context: ./
+      dockerfile: dev_env/Dockerfile
+    volumes:
+      - .:/home/app
+    environment:
+      - PYTHONUNBUFFERED=TRUE
+
+    command:
+      - "tail"
+      - "-f"
+      - "/dev/null"
+

@@ -1,0 +1,47 @@
+TYPE(SCOPE)[BOY-ID]:
+
+# Wrap at 72 chars. ################################## which is here: #
+
+# type:
+#       fix -> change that do not modify fonctional code but fix an issue
+#       feat -> code introduce a new feature
+#       refactor -> change that only modify code without introducing feature nor solving bug
+#       perf -> change that optimize performance
+#       test -> modification impacting testing only
+#       ci -> modification on ci
+#       docs -> doc update
+#
+# scope: feature impacted by the changes
+#
+# append ! if change is breaking
+# cf: https://www.conventionalcommits.org/en/v1.0.0/ for more information
+#
+###### COMMIT SAMPLE ###################################################
+# feat(HOOKS): Add commit hooks style validation
+#
+# To ensure all of Tankyou dev follow commit rules, we wish to enforce
+# commit content using commit-msg hook
+# This hook will be configured to be installed globally and will be
+# triggered on each repository
+########################################################################
+#
+# Title: Summary, imperative, start upper case, don't end with a period (.)
+#
+# Remember blank line between title and body.
+#
+# Body: Explain *what* and *why* (not *how*).
+#
+#
+# How to Write a Git Commit Message:
+# https://chris.beams.io/posts/git-commit/
+#
+# 1.Separate subject from body with a blank line
+# 2. Limit the subject line to 50 characters
+# 3. Capitalize the subject line
+# 4. Do not end the subject line with a period
+# 5. Use the imperative mood in the subject line
+# 6. Wrap the body at 72 characters
+# 7. Use the body to explain what and why vs. how
+#
+# Footer:
+# - BREAKING CHANGE: indicate what change are breaking the API and why

@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+  devenv:
+    volumes:
+      - .:/workspace:cached
+      - apiist-home:/home/vscode
+volumes:
+  apiist-home:

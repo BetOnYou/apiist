@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# this hook ensure commit match rules adopt in Tankyou for commits.
+# - fullfilled the conventional commits format
+# - accepted types for event: fix, feat, refactor, perf,test, ci, docs
+
+## Commit content
+commitFile="$1"
+commitContent=$(cat "${commitFile}")
+IFS=$'\n' arrayContent=(${commitContent[@]})
+
+## Commit validations clauses
+allowedCommitTypes='feat|fix|refactor|perf|test|ci|docs|deps'
+typePattern="^${allowedCommitTypes}"
+titlePattern="${typePattern}(\([A-Z0-9 ,]+\))?([!])?: "
+maxLineLength=72
+
+## Messages
+wrongCommitKind="Commit title is not correctly typed.
+Supports only: ${allowedCommitTypes}."
+
+erronedTitle="Commit title do not match Tankyou rules.
+Must match regex: ${titlePattern}"
+
+invalidLineLength="Lines must be under 72 chars length."
+
+if [[ ! ${arrayContent[0]} =~ ${typePattern} ]]; then
+    echo "${wrongCommitKind}"
+    exit 1
+fi
+
+if [[ ! ${arrayContent[0]} =~ ${titlePattern} ]]; then
+    echo "${erronedTitle}"
+    exit 2
+fi
+
+# Content line must not be longer than 72 chars
+lineNumber=0
+for line in "${arrayContent[@]}"; do
+    if [[ "$line" =~ ^\# ]]; then
+        continue
+    fi
+    lineLength=$(echo -n ${line} | wc -c)
+
+    if [[ ${lineLength} -gt $maxLineLength ]]; then
+        echo "${invalidLineLength}"
+        echo "line: ${lineNumber} has a length of: ${lineLength} witch is greater than ${maxLineLength}"
+        exit 3
+    fi
+
+    lineNumber=$(($lineNumber + 1))
+done
