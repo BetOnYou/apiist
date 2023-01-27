@@ -58,8 +58,16 @@ class PathComponent(object):
 
 
 class Sample(object):
-    def __init__(self, test_suite=None, test_case=None, status=None, start_time=None, duration=None,
-                 error_msg=None, error_trace=None):
+    def __init__(
+        self,
+        test_suite=None,
+        test_case=None,
+        status=None,
+        start_time=None,
+        duration=None,
+        error_msg=None,
+        error_trace=None,
+    ):
         self.test_suite = test_suite  # test label (test method name)
         self.test_case = test_case  # test suite name (class name)
         self.status = status  # test status (PASSED/FAILED/BROKEN/SKIPPED)
@@ -67,7 +75,9 @@ class Sample(object):
         self.duration = duration  # test duration
         self.error_msg = error_msg  # short error message
         self.error_trace = error_trace  # traceback of a failure
-        self.extras = {}  # extra info: ('file' - location, 'full_name' - full qualified name, 'decsription' - docstr)
+        self.extras = (
+            {}
+        )  # extra info: ('file' - location, 'full_name' - full qualified name, 'decsription' - docstr)
         self.subsamples = []  # subsamples list
         self.assertions = []  # list of assertions
         self.path = []  # sample path (i.e. [package, package, module, suite, case, transaction])
@@ -104,13 +114,15 @@ class Sample(object):
         if "assertions" not in extras:
             extras["assertions"] = []
         for ass in self.assertions:
-            extras["assertions"].append({
-                "name": ass.name,
-                "isFailed": ass.failed,
-                "errorMessage": ass.error_message,
-                "args": ass.extras['args'],
-                "kwargs": ass.extras['kwargs']
-            })
+            extras["assertions"].append(
+                {
+                    "name": ass.name,
+                    "isFailed": ass.failed,
+                    "errorMessage": ass.error_message,
+                    "args": ass.extras["args"],
+                    "kwargs": ass.extras["kwargs"],
+                }
+            )
 
         return {
             "test_suite": self.test_suite,
@@ -130,7 +142,7 @@ class Sample(object):
         return "Sample(%r)" % self.to_dict()
 
 
-class ApiritifSampleExtractor(object):
+class ApiistSampleExtractor(object):
     def __init__(self):
         self.active_transactions = []
         self.response_map = {}  # response -> sample
@@ -138,7 +150,7 @@ class ApiritifSampleExtractor(object):
     def parse_recording(self, recording, test_case_sample):
         """
 
-        :type recording: list[apiritif.Event]
+        :type recording: list[apiist.Event]
         :type test_case_sample: Sample
         :rtype: list[Sample]
         """
@@ -157,11 +169,11 @@ class ApiritifSampleExtractor(object):
             elif isinstance(item, apiist.Event):
                 self._parse_generic_event(item)
             else:
-                raise ValueError("Unknown kind of event in apiritif recording: %s" % item)
+                raise ValueError("Unknown kind of event in apiist recording: %s" % item)
 
         if len(self.active_transactions) != 1:
             # TODO: shouldn't we auto-balance them?
-            raise ValueError("Can't parse apiritif recordings: unbalanced transactions")
+            raise ValueError("Can't parse apiist recordings: unbalanced transactions")
 
         toplevel_sample = self.active_transactions.pop()
 
@@ -178,8 +190,10 @@ class ApiritifSampleExtractor(object):
             duration=item.response.elapsed.total_seconds(),
         )
         if is_failure:
-            sample.error_msg = str(item.exception).split('\n')[0]
-            sample.error_trace = traceback.format_exception(type(item.exception), item.exception, None)
+            sample.error_msg = str(item.exception).split("\n")[0]
+            sample.error_trace = traceback.format_exception(
+                type(item.exception), item.exception, None
+            )
 
         sample.path = current_tran.path + [PathComponent("request", item.address)]
         extras = self._extract_extras(item)
@@ -190,8 +204,12 @@ class ApiritifSampleExtractor(object):
 
     def _parse_transaction_started(self, item):
         current_tran = self.active_transactions[-1]
-        tran_sample = Sample(status="PASSED", test_case=item.transaction_name, test_suite=current_tran.test_case)
-        tran_sample.path = current_tran.path + [PathComponent("transaction", item.transaction_name)]
+        tran_sample = Sample(
+            status="PASSED", test_case=item.transaction_name, test_suite=current_tran.test_case
+        )
+        tran_sample.path = current_tran.path + [
+            PathComponent("transaction", item.transaction_name)
+        ]
         self.active_transactions.append(tran_sample)
 
     def _parse_transaction_ended(self, item):
@@ -218,9 +236,21 @@ class ApiritifSampleExtractor(object):
         request_cookies = last_extras.get("requestCookies") or {}
         request_headers = last_extras.get("requestHeaders") or {}
         extras = copy.deepcopy(tran.extras())
-        extras.update(self._extras_dict(name, method, resp_code, reason, headers,
-                                        response_body, len(response_body), response_time,
-                                        request_body, request_cookies, request_headers))
+        extras.update(
+            self._extras_dict(
+                name,
+                method,
+                resp_code,
+                reason,
+                headers,
+                response_body,
+                len(response_body),
+                response_time,
+                request_body,
+                request_cookies,
+                request_headers,
+            )
+        )
         tran_sample.extras = extras
         self.active_transactions[-1].add_subsample(tran_sample)
 
@@ -238,7 +268,7 @@ class ApiritifSampleExtractor(object):
 
     def _parse_generic_event(self, item):
         """
-        :type item: apiritif.Event
+        :type item: apiist.Event
         """
         sample = self.response_map.get(item.response, None)
         if sample is None:
@@ -253,24 +283,36 @@ class ApiritifSampleExtractor(object):
     def _cookies_from_dict(cookies):
         return "; ".join("%s=%s" % (key, cookies.get(key)) for key in cookies)
 
-    def _extras_dict(self, url, method, status_code, reason, response_headers, response_body, response_size,
-                     response_time, request_body, request_cookies, request_headers):
+    def _extras_dict(
+        self,
+        url,
+        method,
+        status_code,
+        reason,
+        response_headers,
+        response_body,
+        response_size,
+        response_time,
+        request_body,
+        request_cookies,
+        request_headers,
+    ):
         record = {
-            'responseCode': status_code,
-            'responseMessage': reason,
-            'responseTime': int(response_time * 1000),
-            'connectTime': 0,
-            'latency': int(response_time * 1000),
-            'responseSize': response_size,
-            'requestSize': 0,
-            'requestMethod': method,
-            'requestURI': url,
-            'assertions': [],  # will be filled later
-            'responseBody': response_body,
-            'requestBody': request_body,
-            'requestCookies': request_cookies,
-            'requestHeaders': request_headers,
-            'responseHeaders': response_headers,
+            "responseCode": status_code,
+            "responseMessage": reason,
+            "responseTime": int(response_time * 1000),
+            "connectTime": 0,
+            "latency": int(response_time * 1000),
+            "responseSize": response_size,
+            "requestSize": 0,
+            "requestMethod": method,
+            "requestURI": url,
+            "assertions": [],  # will be filled later
+            "responseBody": response_body,
+            "requestBody": request_body,
+            "requestCookies": request_cookies,
+            "requestHeaders": request_headers,
+            "responseHeaders": response_headers,
         }
         record["requestCookiesRaw"] = self._cookies_from_dict(record["requestCookies"])
         record["responseBodySize"] = len(record["responseBody"])
@@ -294,7 +336,15 @@ class ApiritifSampleExtractor(object):
             resp_text = resp_text[:hard_limit]
 
         return self._extras_dict(
-            req.url, req.method, resp.status_code, resp.reason,
-            dict(resp.headers), resp_text, len(resp.content), resp.elapsed.total_seconds(),
-            req_text, cookies.get_dict(), dict(resp._request.headers)
+            req.url,
+            req.method,
+            resp.status_code,
+            resp.reason,
+            dict(resp.headers),
+            resp_text,
+            len(resp.content),
+            resp.elapsed.total_seconds(),
+            req_text,
+            cookies.get_dict(),
+            dict(resp._request.headers),
         )

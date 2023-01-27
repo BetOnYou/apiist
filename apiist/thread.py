@@ -84,12 +84,12 @@ def get_from_thread_store(names=None):
 
 
 def get_transaction_handlers():
-    transaction_handlers = get_from_thread_store('transaction_handlers')
+    transaction_handlers = get_from_thread_store("transaction_handlers")
     return transaction_handlers
 
 
 def clean_transaction_handlers():
-    handlers = {'enter': [], 'exit': []}
+    handlers = {"enter": [], "exit": []}
     _thread_local.kwargs["transaction_handlers"] = handlers
 
 

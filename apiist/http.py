@@ -21,7 +21,7 @@ import threading
 import time
 from functools import wraps
 from io import BytesIO
-from typing import Any
+from typing import Any, Optional
 
 import requests
 from jsonpath_ng.ext import parse as jsonpath_parse
@@ -32,7 +32,15 @@ import apiist
 from apiist.ssl_adapter import SSLAdapter
 from apiist.thread import get_from_thread_store, put_into_thread_store
 from apiist.utilities import *
-from apiist.utils import headers_as_text, assert_regexp, assert_not_regexp, log, get_trace, NormalShutdown, graceful
+from apiist.utils import (
+    NormalShutdown,
+    assert_not_regexp,
+    assert_regexp,
+    get_trace,
+    graceful,
+    headers_as_text,
+    log,
+)
 
 BODY_LIMIT = int(os.environ.get("APIRITIF_TRACE_BODY_EXCLIMIT", "1024"))
 
@@ -47,7 +55,7 @@ class ConnectionError(Exception):
 
 class HTTP(object):
     """
-    HTTP is a base class to make http request with apiritif.
+    HTTP is a base class to make http request with apiist.
     """
 
     __is_httpx: bool = False
@@ -59,14 +67,12 @@ class HTTP(object):
         request_client can be any system matching `requests` interfaces
         """
         self.__client = sync_client or requests
-        self.__async_client=async_client
+        self.__async_client = async_client
         self.__support_session = hasattr(self.__client, "Session")
         self.__is_httpx = is_httpx
 
     def target(self, *args, **kwargs):
-        return HTTPTarget(
-            http_instance=self, http_client=self.__client, *args, **kwargs
-        )
+        return HTTPTarget(http_instance=self, http_client=self.__client, *args, **kwargs)
 
     def request(
         self,
@@ -92,9 +98,7 @@ class HTTP(object):
         """
         http.log.info("Request: %s %s", method, address)
         msg = "Request: params=%r, headers=%r, cookies=%r, data=%r, json=%r, files=%r, allow_redirects=%r, timeout=%r"
-        http.log.debug(
-            msg, params, headers, cookies, data, json, files, allow_redirects, timeout
-        )
+        http.log.debug(msg, params, headers, cookies, data, json, files, allow_redirects, timeout)
 
         if headers is None:
             headers = {}
@@ -128,9 +132,7 @@ class HTTP(object):
                 session.mount("https://", adapter)
 
             prepared = session.prepare_request(request)
-            settings = session.merge_environment_settings(
-                prepared.url, {}, False, False, None
-            )
+            settings = session.merge_environment_settings(prepared.url, {}, False, False, None)
 
         try:
             if session:
@@ -149,22 +151,20 @@ class HTTP(object):
                     files=files,
                 )
         except requests.exceptions.Timeout as exc:
-            recorder.record_http_request_failure(
-                method, address, prepared, exc, session
-            )
+            recorder.record_http_request_failure(method, address, prepared, exc, session)
             raise TimeoutError("Connection to %s timed out" % address)
         except requests.exceptions.ConnectionError as exc:
-            recorder.record_http_request_failure(
-                method, address, prepared, exc, session
-            )
+            recorder.record_http_request_failure(method, address, prepared, exc, session)
             raise ConnectionError("Connection to %s failed" % address)
         except BaseException as exc:
-            recorder.record_http_request_failure(
-                method, address, prepared, exc, session
-            )
+            recorder.record_http_request_failure(method, address, prepared, exc, session)
             raise
 
-        http.log.info("Response: %s %s", response.status_code, response.reason if not self.__is_httpx else response.reason_phrase)
+        http.log.info(
+            "Response: %s %s",
+            response.status_code,
+            response.reason if not self.__is_httpx else response.reason_phrase,
+        )
         http.log.debug("Response headers: %r", response.headers)
         http.log.debug(
             "Response cookies: %r",
@@ -174,9 +174,7 @@ class HTTP(object):
 
         wrapped_response = HTTPResponse(response, self.__is_httpx)
 
-        recorder.record_http_request(
-            method, address, prepared, wrapped_response, session
-        )
+        recorder.record_http_request(method, address, prepared, wrapped_response, session)
 
         return wrapped_response
 
@@ -231,9 +229,7 @@ class HTTP(object):
 
         http.log.info("Request: %s %s", method, address)
         msg = "Request: params=%r, headers=%r, cookies=%r, data=%r, json=%r, files=%r, allow_redirects=%r, timeout=%r"
-        http.log.debug(
-            msg, params, headers, cookies, data, json, files, allow_redirects, timeout
-        )
+        http.log.debug(msg, params, headers, cookies, data, json, files, allow_redirects, timeout)
 
         if headers is None:
             headers = {}
@@ -288,22 +284,20 @@ class HTTP(object):
                 files=files,
             )
         except requests.exceptions.Timeout as exc:
-            recorder.record_http_request_failure(
-                method, address, prepared, exc, session
-            )
+            recorder.record_http_request_failure(method, address, prepared, exc, session)
             raise TimeoutError("Connection to %s timed out" % address)
         except requests.exceptions.ConnectionError as exc:
-            recorder.record_http_request_failure(
-                method, address, prepared, exc, session
-            )
+            recorder.record_http_request_failure(method, address, prepared, exc, session)
             raise ConnectionError("Connection to %s failed" % address)
         except BaseException as exc:
-            recorder.record_http_request_failure(
-                method, address, prepared, exc, session
-            )
+            recorder.record_http_request_failure(method, address, prepared, exc, session)
             raise
 
-        http.log.info("Response: %s %s", response.status_code, response.reason if not self.__is_httpx else response.reason_phrase)
+        http.log.info(
+            "Response: %s %s",
+            response.status_code,
+            response.reason if not self.__is_httpx else response.reason_phrase,
+        )
         http.log.debug("Response headers: %r", response.headers)
         http.log.debug(
             "Response cookies: %r",
@@ -313,9 +307,7 @@ class HTTP(object):
 
         wrapped_response = HTTPResponse(response, self.__is_httpx)
 
-        recorder.record_http_request(
-            method, address, prepared, wrapped_response, session
-        )
+        recorder.record_http_request(method, address, prepared, wrapped_response, session)
 
         return wrapped_response
 
@@ -329,16 +321,16 @@ class HTTP(object):
         return await self.async_request("PUT", address, **kwargs)
 
     async def async_delete(self, address, **kwargs):
-        return await  self.async_request("DELETE", address, **kwargs)
+        return await self.async_request("DELETE", address, **kwargs)
 
     async def async_patch(self, address, **kwargs):
-        return await  self.async_request("PATCH", address, **kwargs)
+        return await self.async_request("PATCH", address, **kwargs)
 
     async def async_head(self, address, **kwargs):
-        return await  self.async_request("HEAD", address, **kwargs)
+        return await self.async_request("HEAD", address, **kwargs)
 
     async def async_options(self, address, **kwargs):
-        return await  self.async_request("OPTIONS", address, **kwargs)
+        return await self.async_request("OPTIONS", address, **kwargs)
 
     async def async_connect(self, address, **kwargs):
         return await self.async_request("CONNECT", address, **kwargs)
@@ -463,9 +455,7 @@ class smart_transaction(transaction_logged):
             else:
                 status = "broken"
                 tb = get_trace(exc)
-                self.controller.addError(
-                    exc_type.__name__, message, tb, is_transaction=True
-                )
+                self.controller.addError(exc_type.__name__, message, tb, is_transaction=True)
 
         else:
             status = "success"
@@ -628,9 +618,7 @@ class _EventRecorder(object):
     def record_transaction_end(self, tran):
         self.record_event(TransactionEnded(tran))
         if isinstance(tran, transaction_logged):
-            self.log.info(
-                "Transaction ended:: duration=%.3f,name=%s", tran.duration(), tran.name
-            )
+            self.log.info("Transaction ended:: duration=%.3f,name=%s", tran.duration(), tran.name)
 
     def record_http_request(self, method, address, request, response, session):
         self.record_event(Request(method, address, request, response, session))
@@ -642,12 +630,8 @@ class _EventRecorder(object):
     def record_assertion(self, assertion_name, target_response, extras):
         self.record_event(Assertion(assertion_name, target_response, extras))
 
-    def record_assertion_failure(
-        self, assertion_name, target_response, failure_message
-    ):
-        self.record_event(
-            AssertionFailure(assertion_name, target_response, failure_message)
-        )
+    def record_assertion_failure(self, assertion_name, target_response, failure_message):
+        self.record_event(AssertionFailure(assertion_name, target_response, failure_message))
 
     @staticmethod
     def assertion_decorator(assertion_method):
@@ -683,7 +667,7 @@ class HTTPTarget(object):
         cert=None,
         encrypted_cert=None,
         http_client=None,
-        http_instance: HTTP = None,
+        http_instance: Optional[HTTP] = None,
     ):
         self.address = address
         # config flags
@@ -757,9 +741,7 @@ class HTTPTarget(object):
         """
         headers = headers or {}
         timeout = timeout if timeout is not None else self._timeout
-        allow_redirects = (
-            allow_redirects if allow_redirects is not None else self._allow_redirects
-        )
+        allow_redirects = allow_redirects if allow_redirects is not None else self._allow_redirects
 
         if self._keep_alive and self.__session is None:
             self.__session = self.__request.Session()
@@ -837,13 +819,13 @@ class HTTPResponse(object):
 
         :type py_response: requests.Response
         """
-        self.__is_httpx=is_httpx
+        self.__is_httpx = is_httpx
         self.url = py_response.url
         self.method = py_response.request.method
         self.status_code = int(py_response.status_code)
-        self.reason = py_response.reason  if not self.__is_httpx else py_response.reason_phrase
+        self.reason = py_response.reason if not self.__is_httpx else py_response.reason_phrase
 
-        self.headers = CaseInsensitiveDict(py_response.headers)
+        self.headers = CaseInsensitiveDict(py_response.headers)  # type: ignore
         self.cookies = {x: py_response.cookies.get(x) for x in py_response.cookies}
 
         self.text = py_response.text
@@ -951,10 +933,9 @@ class HTTPResponse(object):
         actual = str(self.status_code)
         expected = [str(code) for code in codes]
         if actual not in expected:
-            msg = (
-                msg
-                or "Actual status code (%s) is not one of expected expected (%s)"
-                % (actual, expected)
+            msg = msg or "Actual status code (%s) is not one of expected expected (%s)" % (
+                actual,
+                expected,
             )
             raise AssertionError(msg)
         return self
@@ -1093,9 +1074,7 @@ class HTTPResponse(object):
         return self
 
     @recorder.assertion_decorator
-    def assert_not_xpath(
-        self, xpath_query, parser_type="html", validate=False, msg=None
-    ):
+    def assert_not_xpath(self, xpath_query, parser_type="html", validate=False, msg=None):
         parser = (
             etree.HTMLParser()
             if parser_type == "html"
@@ -1127,9 +1106,7 @@ class HTTPResponse(object):
         return self
 
     @recorder.assertion_decorator
-    def assert_not_cssselect(
-        self, query, expected_value=None, attribute=None, msg=None
-    ):
+    def assert_not_cssselect(self, query, expected_value=None, attribute=None, msg=None):
         try:
             self.assert_cssselect(query, expected_value, attribute)
         except AssertionError:
@@ -1167,9 +1144,7 @@ class HTTPResponse(object):
             return default
         return matches[0]
 
-    def extract_xpath(
-        self, xpath_query, default=None, parser_type="html", validate=False
-    ):
+    def extract_xpath(self, xpath_query, default=None, parser_type="html", validate=False):
         parser = (
             etree.HTMLParser()
             if parser_type == "html"

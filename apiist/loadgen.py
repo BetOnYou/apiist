@@ -15,7 +15,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import copy
-import unicodecsv as csv
 import json
 import logging
 import multiprocessing
@@ -27,15 +26,15 @@ from multiprocessing.pool import ThreadPool
 from optparse import OptionParser
 from threading import Thread
 
-from nose2.main import PluggableTestProgram
+import unicodecsv as csv
 from nose2.events import Plugin
+from nose2.main import PluggableTestProgram
 
 import apiist
-import apiist.thread as thread
 import apiist.store as store
+import apiist.thread as thread
 from apiist.action_plugins import ActionHandlerFactory, import_plugins
-from apiist.utils import NormalShutdown, log, get_trace, VERSION, graceful
-
+from apiist.utils import VERSION, NormalShutdown, get_trace, graceful, log
 
 # TODO how to implement hits/s control/shape?
 # TODO: VU ID for script
@@ -49,8 +48,12 @@ def spawn_worker(params):
     :type params: Params
     """
     setup_logging(params)
-    log.info("Adding worker: idx=%s\tconcurrency=%s\tresults=%s", params.worker_index, params.concurrency,
-             params.report)
+    log.info(
+        "Adding worker: idx=%s\tconcurrency=%s\tresults=%s",
+        params.worker_index,
+        params.concurrency,
+        params.report,
+    )
     worker = Worker(params)
     worker.start()
     worker.join()
@@ -82,7 +85,7 @@ class Params(object):
 
 class Supervisor(Thread):
     """
-    apiritif-loadgen CLI utility
+    apiist-loadgen CLI utility
         overwatch workers, kill them when terminated
         probably reports through stdout log the names of report files
     :type params: Params
@@ -96,7 +99,9 @@ class Supervisor(Thread):
         self.params = params
         self.workers = None
 
-    def _concurrency_slicer(self, ):
+    def _concurrency_slicer(
+        self,
+    ):
         total_concurrency = 0
         inc = self.params.concurrency / float(self.params.worker_count)
         assert inc >= 1
@@ -110,7 +115,9 @@ class Supervisor(Thread):
 
             params = copy.deepcopy(self.params)
             params.worker_index = idx
-            params.thread_index = total_concurrency  # for subprocess it's index of its first thread
+            params.thread_index = (
+                total_concurrency  # for subprocess it's index of its first thread
+            )
             params.concurrency = conc
             params.report = self.params.report % idx
             params.worker_count = self.params.worker_count
@@ -184,7 +191,7 @@ class Worker(ThreadPool):
         thread.set_index(params.thread_index)
         log.debug("[%s] Starting nose2 iterations: %s", params.worker_index, params)
         assert isinstance(params.tests, list)
-        # argv.extend(['--with-apiritif', '--nocapture', '--exe', '--nologcapture'])
+        # argv.extend(['--with-apiist', '--nocapture', '--exe', '--nologcapture'])
 
         end_time = self.params.ramp_up + self.params.hold_for
         end_time += time.time() if end_time else 0
@@ -197,7 +204,7 @@ class Worker(ThreadPool):
 
         iteration = 0
         handlers = ActionHandlerFactory.create_all()
-        log.debug(f'Action handlers created {handlers}')
+        log.debug(f"Action handlers created {handlers}")
         thread.put_into_thread_store(action_handlers=handlers)
         for handler in handlers:
             handler.startup()
@@ -222,9 +229,13 @@ class Worker(ThreadPool):
                     else:
                         raise RuntimeError(f"Unknown stop_reason: {session.stop_reason}")
                 elif 0 < params.iterations <= iteration:
-                    log.debug("[%s] iteration limit reached: %s", params.worker_index, params.iterations)
+                    log.debug(
+                        "[%s] iteration limit reached: %s", params.worker_index, params.iterations
+                    )
                 elif 0 < end_time <= time.time():
-                    log.debug("[%s] duration limit reached: %s", params.worker_index, params.hold_for)
+                    log.debug(
+                        "[%s] duration limit reached: %s", params.worker_index, params.hold_for
+                    )
                 else:
                     continue  # continue if no one is faced
 
@@ -246,7 +257,9 @@ class Worker(ThreadPool):
         step_granularity = self.params.ramp_up / self.params.steps
         ramp_up_per_thread = self.params.ramp_up / self.params.concurrency
         for thr_idx in range(self.params.concurrency):
-            offset = self.params.worker_index * ramp_up_per_thread / float(self.params.worker_count)
+            offset = (
+                self.params.worker_index * ramp_up_per_thread / float(self.params.worker_count)
+            )
             delay = offset + thr_idx * float(self.params.ramp_up) / self.params.concurrency
             delay -= delay % step_granularity if step_granularity else 0
             params = copy.deepcopy(self.params)
@@ -257,8 +270,8 @@ class Worker(ThreadPool):
 
 class ApiritifTestProgram(PluggableTestProgram):
     def __init__(self, **kwargs):
-        kwargs['module'] = None
-        kwargs['exit'] = False
+        kwargs["module"] = None
+        kwargs["exit"] = False
         self.config = kwargs.pop("config")
         self.session = self.config["session"]
         self.conf_verbosity = None if "verbosity" not in self.config else self.config["verbosity"]
@@ -276,7 +289,7 @@ class ApiritifTestProgram(PluggableTestProgram):
             self.session.verbosity = self.conf_verbosity
         self.session.verbosity = 0
 
-        self.defaultPlugins.append("apiritif.loadgen")
+        self.defaultPlugins.append("apiist.loadgen")
         self.loadPlugins()
         self.createTests()
 
@@ -335,7 +348,7 @@ class LDJSONSampleWriter(object):
 
     def _write_sample(self, sample, test_count, success_count):
         line = json.dumps(sample.to_dict()) + "\n"
-        self.out_stream.write(line.encode('utf-8'))
+        self.out_stream.write(line.encode("utf-8"))
         self.out_stream.flush()
 
 
@@ -346,11 +359,27 @@ class JTLSampleWriter(LDJSONSampleWriter):
     def __enter__(self):
         obj = super(JTLSampleWriter, self).__enter__()
 
-        fieldnames = ["timeStamp", "elapsed", "Latency", "label", "responseCode", "responseMessage", "success",
-                      "allThreads", "bytes"]
-        endline = '\n'  # \r will be preprended automatically because out_stream is opened in text mode
-        self.writer = csv.DictWriter(self.out_stream, fieldnames=fieldnames, dialect=csv.excel, lineterminator=endline,
-                                     encoding='utf-8')
+        fieldnames = [
+            "timeStamp",
+            "elapsed",
+            "Latency",
+            "label",
+            "responseCode",
+            "responseMessage",
+            "success",
+            "allThreads",
+            "bytes",
+        ]
+        endline = (
+            "\n"  # \r will be preprended automatically because out_stream is opened in text mode
+        )
+        self.writer = csv.DictWriter(
+            self.out_stream,
+            fieldnames=fieldnames,
+            dialect=csv.excel,
+            lineterminator=endline,
+            encoding="utf-8",
+        )
         self.writer.writeheader()
         self.out_stream.flush()
 
@@ -384,7 +413,11 @@ class JTLSampleWriter(LDJSONSampleWriter):
         """
         :type sample: Sample
         """
-        bytes = sample.extras.get("responseHeadersSize", 0) + 2 + sample.extras.get("responseBodySize", 0)
+        bytes = (
+            sample.extras.get("responseHeadersSize", 0)
+            + 2
+            + sample.extras.get("responseBodySize", 0)
+        )
 
         message = sample.error_msg
         if not message:
@@ -397,19 +430,19 @@ class JTLSampleWriter(LDJSONSampleWriter):
                 elif sample.extras.get("responseMessage"):
                     message = sample.extras.get("responseMessage")
                     break
-        self.writer.writerow({
-            "timeStamp": int(1000 * sample.start_time),
-            "elapsed": int(1000 * sample.duration),
-            "Latency": 0,  # TODO
-            "label": sample.test_case,
-
-            "bytes": bytes,
-
-            "responseCode": sample.extras.get("responseCode"),
-            "responseMessage": message,
-            "allThreads": self.concurrency,  # TODO: there will be a problem aggregating concurrency for rare samples
-            "success": "true" if sample.status == "PASSED" else "false",
-        })
+        self.writer.writerow(
+            {
+                "timeStamp": int(1000 * sample.start_time),
+                "elapsed": int(1000 * sample.duration),
+                "Latency": 0,  # TODO
+                "label": sample.test_case,
+                "bytes": bytes,
+                "responseCode": sample.extras.get("responseCode"),
+                "responseMessage": message,
+                "allThreads": self.concurrency,  # TODO: there will be a problem aggregating concurrency for rare samples
+                "success": "true" if sample.status == "PASSED" else "false",
+            }
+        )
         self.out_stream.flush()
 
 
@@ -420,7 +453,7 @@ class ApiritifPlugin(Plugin):
     :type sample_writer: LDJSONSampleWriter
     """
 
-    configSection = 'apiritif-plugin'
+    configSection = "apiist-plugin"
     alwaysOn = True
 
     def __init__(self):
@@ -434,7 +467,7 @@ class ApiritifPlugin(Plugin):
         test = event.test
         thread.clean_transaction_handlers()
         test_fqn = test.id()  # [package].module.class.method
-        suite_name, case_name = test_fqn.split('.')[-2:]
+        suite_name, case_name = test_fqn.split(".")[-2:]
         log.debug("id: %r", test_fqn)
         class_method = case_name
 
@@ -444,11 +477,12 @@ class ApiritifPlugin(Plugin):
             "suite_name": suite_name,
             "test_fqn": test_fqn,
             "description": description,
-            "class_method": class_method}
+            "class_method": class_method,
+        }
         self.controller.startTest()
 
     def stopTest(self, event):
-        #if not 'NormalShutdown' in self.session.stop_reason
+        # if not 'NormalShutdown' in self.session.stop_reason
         self.controller.stopTest()
 
     def reportError(self, event):
@@ -463,11 +497,13 @@ class ApiritifPlugin(Plugin):
         # test_dict will be None if startTest wasn't called (i.e. exception in setUp/setUpClass)
         # status=BROKEN
         assertion_name = error[0].__name__
-        error_msg = str(error[1]).split('\n')[0]
+        error_msg = str(error[1]).split("\n")[0]
         error_trace = get_trace(error)
         if isinstance(error[1], NormalShutdown):
-            self.session.set_stop_reason(f"{error[1].__class__.__name__} for vu #{thread.get_index()}: {error_msg}")
-            self.controller.current_sample = None   # partial data mustn't be written
+            self.session.set_stop_reason(
+                f"{error[1].__class__.__name__} for vu #{thread.get_index()}: {error_msg}"
+            )
+            self.controller.current_sample = None  # partial data mustn't be written
         else:
             if self.controller.current_sample is not None:
                 self.controller.addError(assertion_name, error_msg, error_trace)
@@ -503,14 +539,16 @@ class ApiritifPlugin(Plugin):
 
 def cmdline_to_params():
     parser = OptionParser()
-    parser.add_option('', '--concurrency', action='store', type="int", default=1)
-    parser.add_option('', '--iterations', action='store', type="int", default=sys.maxsize)
-    parser.add_option('', '--ramp-up', action='store', type="float", default=0)
-    parser.add_option('', '--steps', action='store', type="int", default=sys.maxsize)
-    parser.add_option('', '--hold-for', action='store', type="float", default=0)
-    parser.add_option('', '--result-file-template', action='store', type="str", default="result-%s.csv")
-    parser.add_option('', '--verbose', action='store_true', default=False)
-    parser.add_option('', "--version", action='store_true', default=False)
+    parser.add_option("", "--concurrency", action="store", type="int", default=1)
+    parser.add_option("", "--iterations", action="store", type="int", default=sys.maxsize)
+    parser.add_option("", "--ramp-up", action="store", type="float", default=0)
+    parser.add_option("", "--steps", action="store", type="int", default=sys.maxsize)
+    parser.add_option("", "--hold-for", action="store", type="float", default=0)
+    parser.add_option(
+        "", "--result-file-template", action="store", type="str", default="result-%s.csv"
+    )
+    parser.add_option("", "--verbose", action="store_true", default=False)
+    parser.add_option("", "--version", action="store_true", default=False)
     opts, args = parser.parse_args()
     log.debug("%s %s", opts, args)
 
@@ -540,7 +578,7 @@ def setup_logging(params):
         logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format=logformat)
     else:
         logging.basicConfig(level=logging.INFO, stream=sys.stdout, format=logformat)
-    log.setLevel(logging.INFO)  # TODO: do we need to include apiritif debug logs in verbose mode?
+    log.setLevel(logging.INFO)  # TODO: do we need to include apiist debug logs in verbose mode?
 
 
 def main():
@@ -551,5 +589,5 @@ def main():
     supervisor.join()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

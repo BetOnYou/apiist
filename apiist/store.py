@@ -3,7 +3,7 @@ import time
 import traceback
 
 import apiist
-from apiist.samples import ApiritifSampleExtractor, Sample, PathComponent
+from apiist.samples import ApiistSampleExtractor, PathComponent, Sample
 from apiist.utils import get_trace
 
 writer = None
@@ -16,7 +16,7 @@ class SampleController(object):
         self.log = log
         self.test_count = 0
         self.success_count = 0
-        self.apiritif_extractor = ApiritifSampleExtractor()
+        self.apiist_extractor = ApiistSampleExtractor()
         self.tran_mode = False  # it's regular test (without smart transaction) by default
         self.start_time = None
         self.end_time = None
@@ -28,16 +28,16 @@ class SampleController(object):
             test_case=self.test_info["test_case"],
             test_suite=self.test_info["suite_name"],
             start_time=time.time(),
-            status="SKIPPED")
-        self.current_sample.extras.update({
-            "full_name": self.test_info["test_fqn"],
-            "description": self.test_info["description"]
-        })
+            status="SKIPPED",
+        )
+        self.current_sample.extras.update(
+            {"full_name": self.test_info["test_fqn"], "description": self.test_info["description"]}
+        )
         if "." in self.test_info["class_method"]:  # TestClass.test_method
-            class_name, method_name = self.test_info["class_method"].split('.')[:2]
-            self.current_sample.path.extend([
-                PathComponent("class", class_name),
-                PathComponent("method", method_name)])
+            class_name, method_name = self.test_info["class_method"].split(".")[:2]
+            self.current_sample.path.extend(
+                [PathComponent("class", class_name), PathComponent("method", method_name)]
+            )
         else:  # test_func
             self.current_sample.path.append(PathComponent("func", self.test_info["class_method"]))
 
@@ -56,7 +56,7 @@ class SampleController(object):
     def addFailure(self, error, is_transaction=False):
         if self.tran_mode == is_transaction:
             assertion_name = error[0].__name__
-            error_msg = str(error[1]).split('\n')[0]
+            error_msg = str(error[1]).split("\n")[0]
             error_trace = get_trace(error)
             self.current_sample.add_assertion(assertion_name, {"args": [], "kwargs": {}})
             self.current_sample.set_assertion_failed(assertion_name, error_msg, error_trace)
@@ -67,17 +67,17 @@ class SampleController(object):
             self.success_count += 1
 
     def stopTest(self, is_transaction=False):
-        if self.tran_mode == is_transaction  and not self.session.stop_reason:
+        if self.tran_mode == is_transaction and not self.session.stop_reason:
             self.end_time = time.time()
             self.current_sample.duration = self.end_time - self.current_sample.start_time
 
-            samples_processed = self._process_apiritif_samples(self.current_sample)
+            samples_processed = self._process_apiist_samples(self.current_sample)
             if not samples_processed:
                 self._process_sample(self.current_sample)
 
             self.current_sample = None
 
-    def _process_apiritif_samples(self, sample):
+    def _process_apiist_samples(self, sample):
         samples = []
 
         # get list of events
@@ -86,7 +86,7 @@ class SampleController(object):
         try:
             if recording:
                 # convert requests (events) to samples
-                samples = self.apiritif_extractor.parse_recording(recording, sample)
+                samples = self.apiist_extractor.parse_recording(recording, sample)
         except BaseException as exc:
             self.log.debug("Couldn't parse recording: %s", traceback.format_exc())
             self.log.warning("Couldn't parse recording: %s", exc)

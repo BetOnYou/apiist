@@ -12,3 +12,7 @@ codecov
 nose-exclude
 nose-timer
 pluggy>=1.0
+# Types
+types-chardet
+types-requests
+types-pyOpenSSL

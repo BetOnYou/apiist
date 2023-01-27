@@ -22,11 +22,13 @@ class TestTransactions(TestCase):
     def test_4_no_transactions(self):
         pass
 
-    def test_5_apiritif_assertions(self):
+    def test_5_apiist_assertions(self):
         apiist.http.get("http://blazedemo.com/").assert_ok()
 
-    def test_6_apiritif_assertions_failed(self):
-        apiist.http.get("http://blazedemo.com/").assert_failed()  # this assertion intentionally fails
+    def test_6_apiist_assertions_failed(self):
+        apiist.http.get(
+            "http://blazedemo.com/"
+        ).assert_failed()  # this assertion intentionally fails
 
     def test_7_failed_request(self):
         apiist.http.get("http://notexists")

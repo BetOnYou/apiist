@@ -1,5 +1,5 @@
 """
-Data feeders for Apiritif.
+Data feeders for Apiist.
 
 Copyright 2018 BlazeMeter Inc.
 
@@ -41,7 +41,9 @@ class Reader(object):
 
 
 class CSVReaderPerThread(Reader):  # processes multi-thread specific
-    def __init__(self, filename, fieldnames=None, delimiter=None, loop=True, quoted=None, encoding=None):
+    def __init__(
+        self, filename, fieldnames=None, delimiter=None, loop=True, quoted=None, encoding=None
+    ):
         self.filename = filename
         self.fieldnames = fieldnames
         self.delimiter = delimiter
@@ -64,7 +66,8 @@ class CSVReaderPerThread(Reader):  # processes multi-thread specific
                 delimiter=self.delimiter,
                 loop=self.loop,
                 quoted=self.quoted,
-                encoding=self.encoding)
+                encoding=self.encoding,
+            )
 
             thread_data.csv_readers[id(self)] = csv_reader
 
@@ -88,14 +91,23 @@ class CSVReaderPerThread(Reader):  # processes multi-thread specific
 
 
 class CSVReader(Reader):
-    def __init__(self, filename, step=1, first=0, fieldnames=None, delimiter=None, loop=True, quoted=None,
-                 encoding=None):
+    def __init__(
+        self,
+        filename,
+        step=1,
+        first=0,
+        fieldnames=None,
+        delimiter=None,
+        loop=True,
+        quoted=None,
+        encoding=None,
+    ):
         self.step = step
         self.first = first
         self.csv = {}
         format_params = {}
         if not encoding and quoted is None:
-            with open(filename, 'rb') as bin_fds:
+            with open(filename, "rb") as bin_fds:
                 if not encoding:
                     detector = UniversalDetector()
                     for line in bin_fds.readlines():
@@ -103,7 +115,7 @@ class CSVReader(Reader):
                         if detector.done:
                             break
                     detector.close()
-                    encoding = detector.result['encoding']
+                    encoding = detector.result["encoding"]
                     bin_fds.seek(0)
 
                 if quoted is None:
@@ -114,7 +126,7 @@ class CSVReader(Reader):
                     bin_fds.seek(0)
         format_params["quoting"] = csv.QUOTE_MINIMAL if quoted else csv.QUOTE_NONE
 
-        self.fds = open(filename, 'r', encoding=encoding)
+        self.fds = open(filename, "r", encoding=encoding)
 
         if not delimiter:
             dialect = csv.Sniffer().sniff(self.fds.read())

@@ -15,7 +15,7 @@ class TestCSV(TestCase):
         thread.set_total(1)  # set standard concurrency to 1 for all tests
 
     def test_threads_and_processes(self):
-        """ check if threads and processes can divide csv fairly """
+        """check if threads and processes can divide csv fairly"""
         script = os.path.join(RESOURCES_DIR, "test_thread_reader.py")
         outfile = tempfile.NamedTemporaryFile()
         report = outfile.name + "-%s.csv"
@@ -37,27 +37,28 @@ class TestCSV(TestCase):
                 content.extend(f.readlines()[1::2])
 
         threads = {"0": [], "1": [], "2": [], "3": []}
-        content = [item[item.index('"') + 1:].strip() for item in content]
+        content = [item[item.index('"') + 1 :].strip() for item in content]
         for item in content:
             self.assertEqual(item[0], item[2])  # thread equals target
             self.assertEqual("a", item[-1])  # age is the same
             if item[6] == "0":
-                self.assertEqual(-1, item.find('+'))
+                self.assertEqual(-1, item.find("+"))
             else:
-                self.assertNotEqual(-1, item.find('+'))  # name value is modified
+                self.assertNotEqual(-1, item.find("+"))  # name value is modified
             threads[item[0]].append(item[9:-2])
 
         # format: <user>:<pass>, quoting ignored
         target = {
-            '0': ['""u:ser0""', '""u+:ser0""', 'user4:4', 'user4+:4'],
-            '1': ['""user1"":1', '""user1""+:1', 'user5:5', 'user5+:5'],
-            '2': ['user2:""2""', 'user2+:""2""', '""u:ser0""', '""u+:ser0""'],
-            '3': ['user3:3', 'user3+:3', '""user1"":1', '""user1""+:1']}
+            "0": ['""u:ser0""', '""u+:ser0""', "user4:4", "user4+:4"],
+            "1": ['""user1"":1', '""user1""+:1', "user5:5", "user5+:5"],
+            "2": ['user2:""2""', 'user2+:""2""', '""u:ser0""', '""u+:ser0""'],
+            "3": ["user3:3", "user3+:3", '""user1"":1', '""user1""+:1'],
+        }
 
         self.assertEqual(threads, target)
 
     def test_two_readers(self):
-        """ check different reading speed, fieldnames and separators """
+        """check different reading speed, fieldnames and separators"""
         script = os.path.join(RESOURCES_DIR, "test_two_readers.py")
         outfile = tempfile.NamedTemporaryFile()
         report = outfile.name + "-%s.csv"
@@ -79,20 +80,33 @@ class TestCSV(TestCase):
                 content.extend(f.readlines()[1::2])
 
         threads = {"0": [], "1": []}
-        content = [item[item.index('"') + 1:].strip() for item in content]
+        content = [item[item.index('"') + 1 :].strip() for item in content]
         for item in content:
             threads[item[0]].append(item[2:])
 
         target = {  # reader1 runs two times faster
-            "0": ["0. u,ser0:000:ze:00", "1. u,ser0:000:tu:22", "0. user2:2:fo:44",
-                  "1. user2:2:si:66", "0. user4:4:ze:00", "1. user4:4:tu:22"],
-            "1": ["0. user1:1:on:11", "1. user1:1:th:33", "0. user3:3:fi:55",
-                  "1. user3:3:se:77", "0. user5:5:on:11", "1. user5:5:th:33"]}
+            "0": [
+                "0. u,ser0:000:ze:00",
+                "1. u,ser0:000:tu:22",
+                "0. user2:2:fo:44",
+                "1. user2:2:si:66",
+                "0. user4:4:ze:00",
+                "1. user4:4:tu:22",
+            ],
+            "1": [
+                "0. user1:1:on:11",
+                "1. user1:1:th:33",
+                "0. user3:3:fi:55",
+                "1. user3:3:se:77",
+                "0. user5:5:on:11",
+                "1. user5:5:th:33",
+            ],
+        }
 
         self.assertEqual(threads, target)
 
     def test_reader_without_loop(self):
-        """ check different reading speed, fieldnames and separators """
+        """check different reading speed, fieldnames and separators"""
         reader = CSVReaderPerThread(os.path.join(RESOURCES_DIR, "data/source0.csv"), loop=False)
         data = []
         try:
@@ -133,14 +147,14 @@ class TestCSV(TestCase):
         target_data = [line.strip() for line in target_data]
 
         target_vus = [str(vu) for vu in range(concurrency)]
-        real_vus = [record.split(':')[0] for record in content]
-        self.assertEqual(set(target_vus), set(real_vus))    # all VUs participated
+        real_vus = [record.split(":")[0] for record in content]
+        self.assertEqual(set(target_vus), set(real_vus))  # all VUs participated
 
-        real_data = [record.split(':')[1] for record in content]
+        real_data = [record.split(":")[1] for record in content]
         self.assertEqual(set(target_data), set(real_data))  # all data has been read
         self.assertEqual(len(target_data), len(real_data))
 
-    def test_apiritif_no_loop_multiple_records(self):
+    def test_apiist_no_loop_multiple_records(self):
         script = os.path.join(RESOURCES_DIR, "test_csv_records.py")
         outfile = tempfile.NamedTemporaryFile()
         report = outfile.name + "-%s.csv"
@@ -169,8 +183,12 @@ class TestCSV(TestCase):
             self.assertTrue("true" in line)
 
     def test_csv_encoding(self):
-        reader_utf8 = CSVReaderPerThread(os.path.join(RESOURCES_DIR, "data/encoding_utf8.csv"), loop=False)
-        reader_utf16 = CSVReaderPerThread(os.path.join(RESOURCES_DIR, "data/encoding_utf16.csv"), loop=False)
+        reader_utf8 = CSVReaderPerThread(
+            os.path.join(RESOURCES_DIR, "data/encoding_utf8.csv"), loop=False
+        )
+        reader_utf16 = CSVReaderPerThread(
+            os.path.join(RESOURCES_DIR, "data/encoding_utf16.csv"), loop=False
+        )
         data_utf8, data_utf16 = [], []
 
         reader_utf8.read_vars()
@@ -186,14 +204,15 @@ class TestCSV(TestCase):
             CSVReaderPerThread(os.path.join(RESOURCES_DIR, "data/quoted_utf8.csv"), loop=False),
             CSVReaderPerThread(os.path.join(RESOURCES_DIR, "data/quoted_utf16.csv"), loop=False),
             CSVReaderPerThread(os.path.join(RESOURCES_DIR, "data/unquoted_utf8.csv"), loop=False),
-            CSVReaderPerThread(os.path.join(RESOURCES_DIR, "data/unquoted_utf16.csv"), loop=False)]
+            CSVReaderPerThread(os.path.join(RESOURCES_DIR, "data/unquoted_utf16.csv"), loop=False),
+        ]
         readers_data = []
 
         for reader in readers:
             reader.read_vars()
             readers_data.append(reader.get_vars())
 
-        result = {'ac1': '1', 'bc1': '2', 'cc1': '3'}
+        result = {"ac1": "1", "bc1": "2", "cc1": "3"}
         for data in readers_data:
             self.assertEqual(data, result)
 
@@ -201,13 +220,16 @@ class TestCSV(TestCase):
         readers = [
             CSVReaderPerThread(os.path.join(RESOURCES_DIR, "data/encoding_utf8.csv"), loop=False),
             CSVReaderPerThread(os.path.join(RESOURCES_DIR, "data/delimiter_tab.csv"), loop=False),
-            CSVReaderPerThread(os.path.join(RESOURCES_DIR, "data/delimiter_semicolon.csv"), loop=False)]
+            CSVReaderPerThread(
+                os.path.join(RESOURCES_DIR, "data/delimiter_semicolon.csv"), loop=False
+            ),
+        ]
         readers_data = []
 
         for reader in readers:
             reader.read_vars()
             readers_data.append(reader.get_vars())
 
-        result = {'ac1': '1', 'bc1': '2', 'cc1': '3'}
+        result = {"ac1": "1", "bc1": "2", "cc1": "3"}
         for data in readers_data:
             self.assertEqual(data, result)

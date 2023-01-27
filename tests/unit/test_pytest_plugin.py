@@ -13,17 +13,21 @@ from pluggy._result import _Result
 
 import apiist
 from apiist import http
-from apiist.pytest_plugin import (ApiritifPytestPlugin, pytest_addoption,
-                                  pytest_configure, pytest_unconfigure)
+from apiist.pytest_plugin import (
+    ApiistPytestPlugin,
+    pytest_addoption,
+    pytest_configure,
+    pytest_unconfigure,
+)
 
 ctype = namedtuple("config", ["option", "pluginmanager", "getoption"])
-otype = namedtuple("option", ["apiritif_trace", "apiritif_trace_detail"])
+otype = namedtuple("option", ["apiist_trace", "apiist_trace_detail"])
 
 
 @contextmanager
 def fake_process(trace_fname):
     config = ctype(otype(trace_fname, 4), PytestPluginManager(), lambda x, y: 0)
-    plugin = ApiritifPytestPlugin(config)
+    plugin = ApiistPytestPlugin(config)
     next(plugin.pytest_runtest_setup(None))
 
     yield
@@ -32,7 +36,7 @@ def fake_process(trace_fname):
     node._report_sections = []
     node.location = []
     node.user_properties = []
-    call = CallInfo.from_call(lambda: 1, 'call')
+    call = CallInfo.from_call(lambda: 1, "call")
     report = TestReport.from_item_and_call(node, call)
     result = _Result(report, None)
     gen = plugin.pytest_runtest_makereport(node, call)
@@ -79,10 +83,13 @@ class TestHTTPMethods(TestCase):
 
         with fake_process(tmp.name):
             with apiist.transaction("tran") as tran:
-                tran.set_request(bytes("test", 'utf8'))
+                tran.set_request(bytes("test", "utf8"))
 
-            http.post('http://httpbin.org/post', data=bytes([0xa0, 1, 2, 3]),
-                      headers={'Content-Type': 'application/octet-stream'})
+            http.post(
+                "http://httpbin.org/post",
+                data=bytes([0xA0, 1, 2, 3]),
+                headers={"Content-Type": "application/octet-stream"},
+            )
 
         with open(tmp.name) as fp:
             data = json.load(fp)

@@ -76,7 +76,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: security
-        run: bandit -r -ll -ii apiist
+        run: bandit apiist
 
   unit:
     timeout-minutes: 30

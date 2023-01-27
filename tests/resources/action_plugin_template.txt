@@ -1,4 +1,4 @@
-from apiritif.action_plugins import BaseActionHandler, ActionHandlerFactory
+from apiist.action_plugins import BaseActionHandler, ActionHandlerFactory
 
 
 @ActionHandlerFactory.register('local')

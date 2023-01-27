@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.DEBUG)
 class DummyWriter(JTLSampleWriter):
     def __init__(self, output_file, workers_log):
         super(DummyWriter, self).__init__(output_file)
-        with open(workers_log, 'a') as log:
+        with open(workers_log, "a") as log:
             log.write("%s\n" % os.getpid())
 
 
@@ -50,9 +50,9 @@ class TestLoadGen(TestCase):
         worker = Worker(params)
         worker.run_nose(params)
 
-        # todo: fix result of "samples = self.apiritif_extractor.parse_recording(recording, sample)"
-        test_result = apiist.get_from_thread_store('test_result')
-        sample = ['1. setup1', '2. setup2', '3. main1', '4. main2', '5. teardown1', '6. teardown2']
+        # todo: fix result of "samples = self.apiist_extractor.parse_recording(recording, sample)"
+        test_result = apiist.get_from_thread_store("test_result")
+        sample = ["1. setup1", "2. setup2", "3. main1", "4. main2", "5. teardown1", "6. teardown2"]
         self.assertEqual(sample, test_result)
 
     def test_setup_errors(self):
@@ -134,22 +134,29 @@ class TestLoadGen(TestCase):
         #   1. be unique for thread
         #   2. be set up every launch of test suite
         def log_line(line):
-            with open(thread.handlers_log, 'a') as log:
+            with open(thread.handlers_log, "a") as log:
                 log.write("%s\n" % line)
 
         def mock_get_handlers():
-            transaction_handlers = thread.get_from_thread_store('transaction_handlers')
+            transaction_handlers = thread.get_from_thread_store("transaction_handlers")
             if not transaction_handlers:
-                transaction_handlers = {'enter': [], 'exit': []}
+                transaction_handlers = {"enter": [], "exit": []}
 
-            length = "%s/%s" % (len(transaction_handlers['enter']), len(transaction_handlers['exit']))
-            log_line("get: {pid: %s, idx: %s, iteration: %s, len: %s}" %
-                     (os.getpid(), thread.get_index(), thread.get_iteration(), length))
+            length = "%s/%s" % (
+                len(transaction_handlers["enter"]),
+                len(transaction_handlers["exit"]),
+            )
+            log_line(
+                "get: {pid: %s, idx: %s, iteration: %s, len: %s}"
+                % (os.getpid(), thread.get_index(), thread.get_iteration(), length)
+            )
             return transaction_handlers
 
         def mock_set_handlers(handlers):
-            log_line("set: {pid: %s, idx: %s, iteration: %s, handlers: %s}," %
-                     (os.getpid(), thread.get_index(), thread.get_iteration(), handlers))
+            log_line(
+                "set: {pid: %s, idx: %s, iteration: %s, handlers: %s},"
+                % (os.getpid(), thread.get_index(), thread.get_iteration(), handlers)
+            )
             thread.put_into_thread_store(transaction_handlers=handlers)
 
         outfile = tempfile.NamedTemporaryFile()
@@ -158,7 +165,7 @@ class TestLoadGen(TestCase):
         params = Params()
 
         # use this log to spy on writers
-        handlers_log = outfile.name + '-handlers.log'
+        handlers_log = outfile.name + "-handlers.log"
         thread.handlers_log = handlers_log
 
         params.tests = [os.path.join(RESOURCES_DIR, "test_smart_transactions.py")]
@@ -183,8 +190,10 @@ class TestLoadGen(TestCase):
                 handlers = log.readlines()
 
             self.assertEqual(36, len(handlers))
-            self.assertEqual(6, len([handler for handler in handlers if handler.startswith('set')]))
-            self.assertEqual(0, len([handler for handler in handlers if handler.endswith('2/2}')]))
+            self.assertEqual(
+                6, len([handler for handler in handlers if handler.startswith("set")])
+            )
+            self.assertEqual(0, len([handler for handler in handlers if handler.endswith("2/2}")]))
 
         finally:
             apiist.get_transaction_handlers = saved_get_handlers
@@ -309,7 +318,7 @@ class TestWriter(TestCase):
         params = Params()
 
         # use this log to spy on writers
-        workers_log = outfile.name + '-workers.log'
+        workers_log = outfile.name + "-workers.log"
         params.workers_log = workers_log
 
         params.tests = [os.path.join(RESOURCES_DIR, "test_smart_transactions.py")]
@@ -341,7 +350,7 @@ class TestWriter(TestCase):
 
 
 def mock_spawn_worker(params):
-    with open(params.report, 'w') as log:
+    with open(params.report, "w") as log:
         log.write(str(os.getpid()))
         time.sleep(0.2)
 
