@@ -1,0 +1,38 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-type: "direct"
+    open-pull-requests-limit: 10
+    target-branch: dev
+    reviewers:
+      - "titouanfreville"
+    assignees:
+      - "titouanfreville"
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    allow:
+      - dependency-type: "direct"
+    open-pull-requests-limit: 5
+    target-branch: dev
+    reviewers:
+      - "titouanfreville"
+    assignees:
+      - "titouanfreville"
+  - package-ecosystem: docker
+    directory: "/infra/images/release"
+    schedule:
+      interval: "monthly"
+    allow:
+      - dependency-type: "direct"
+    open-pull-requests-limit: 2
+    target-branch: dev
+    reviewers:
+      - "titouanfreville"
+    assignees:
+      - "titouanfreville"

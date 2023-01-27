@@ -1,0 +1,169 @@
+name: latest pull request
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - "**.md"
+      - "Makefile"
+      - ".devcontainer"
+      - ".thunderclient"
+      - "credentials"
+      - "docker-compose.yml"
+      - ".env.sample"
+      - ".gitignore"
+      - "**.yml"
+      - "shared"
+      - "docs"
+      - "credentials"
+jobs:
+  lint:
+    timeout-minutes: 5
+    name: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - name: cancel previous runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.version }}
+
+      - name: install dependencies
+        run: |
+          pip install -r requirements_dev.txt
+          pip install -r requirements.txt
+
+      - name: lint
+        run: |
+          flake8 apiist
+          mypy apiist
+
+  security:
+    timeout-minutes: 5
+    name: security
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - name: cancel previous runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.version }}
+
+      - name: install dependencies
+        run: |
+          pip install -r requirements_dev.txt
+          pip install -r requirements.txt
+
+      - name: security
+        run: bandit -r -ll -ii apiist
+
+  unit:
+    timeout-minutes: 30
+    needs:
+      - lint
+      - security
+    strategy:
+      matrix:
+        version: ["3.8", "3.9", "3.10", "3.11"]
+    name: unit
+    runs-on: ubuntu-latest
+    steps:
+      - name: cancel previous runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "${{ matrix.version }}"
+
+      - name: install dependencies
+        run: |
+          pip install -r requirements_dev.txt
+          pip install -r requirements.txt
+
+      - name: testing-with-coverage
+        if: ${{ matrix.version }} == "3.11"
+        run: |
+          COVERAGE_FILE=".cover_unit" coverage run --source=apiist -m nose2 -s tests/unit -v
+          ls -a
+
+      - name: testing
+        if: ${{ matrix.version }} != "3.11"
+        run: |
+          nose2 -s tests/unit -v
+
+      - uses: actions/upload-artifact@master
+        if: ${{ matrix.version }} == "3.11"
+        with:
+          name: unit-coverage
+          path: .cover_unit
+          if-no-files-found: error
+
+  cover:
+    timeout-minutes: 60
+    needs:
+      - unit
+    name: cover
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: cancel previous runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.11"
+
+      - name: install coverage
+        run: pip install coverage
+
+      - uses: actions/download-artifact@master
+        with:
+          name: integ-coverage
+
+      - uses: actions/download-artifact@master
+        with:
+          name: unit-coverage
+
+      - name: Combine cover reports
+        run: |
+          coverage combine .cover_unit
+          coverage lcov -o coverage.lcov
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: coverage.lcov
+          github-token: ${{ secrets.GITHUB_TOKEN }}
