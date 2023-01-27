@@ -3,9 +3,11 @@ from unittest import TestCase
 
 import nose2
 
-from apiritif import store
-from . import Recorder  # required for nose2. unittest.cfg loads this plugin from here
+from apiist import store
 from tests.unit import RESOURCES_DIR
+
+from . import \
+    Recorder  # required for nose2. unittest.cfg loads this plugin from here
 
 
 class CachingWriter(object):

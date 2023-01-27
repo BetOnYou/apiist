@@ -2,9 +2,9 @@
 import time
 import traceback
 
-import apiritif
-from apiritif.samples import ApiritifSampleExtractor, Sample, PathComponent
-from apiritif.utils import get_trace
+import apiist
+from apiist.samples import ApiritifSampleExtractor, Sample, PathComponent
+from apiist.utils import get_trace
 
 writer = None
 
@@ -81,7 +81,7 @@ class SampleController(object):
         samples = []
 
         # get list of events
-        recording = apiritif.recorder.pop_events(from_ts=self.start_time, to_ts=self.end_time)
+        recording = apiist.recorder.pop_events(from_ts=self.start_time, to_ts=self.end_time)
 
         try:
             if recording:

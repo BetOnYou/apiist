@@ -1,7 +1,7 @@
 import math
 from unittest import TestCase
 
-import apiritif
+import apiist
 
 
 def setUpModule():
@@ -11,7 +11,7 @@ def setUpModule():
 class TestSimple(TestCase):
     def test_case1(self):
         #apiritif.http.get("http://localhost:8003")
-        with apiritif.transaction("tran name"):
+        with apiist.transaction("tran name"):
             for x in range(1000, 10000):
                 y = math.sqrt(x)
 

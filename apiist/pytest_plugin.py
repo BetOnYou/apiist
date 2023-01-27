@@ -4,8 +4,8 @@ import traceback
 
 import pytest
 
-import apiritif
-from apiritif.samples import ApiritifSampleExtractor, Sample
+import apiist
+from apiist.samples import ApiritifSampleExtractor, Sample
 
 
 def pytest_addoption(parser):
@@ -73,7 +73,7 @@ class ApiritifPytestPlugin(object):
             json.dump(self._trace_map, fp, indent=True)
 
     def _pop_events(self):
-        return apiritif.recorder.pop_events(from_ts=-1, to_ts=sys.maxsize)
+        return apiist.recorder.pop_events(from_ts=-1, to_ts=sys.maxsize)
 
     def _filter(self, items):
         for item in items:

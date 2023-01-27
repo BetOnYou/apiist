@@ -5,7 +5,7 @@ from importlib import import_module
 from pathlib import Path
 from pkgutil import iter_modules
 
-from apiritif.utils import log
+from apiist.utils import log
 
 PLUGINS_PATH = 'PLUGINS_PATH'
 

@@ -2,7 +2,7 @@ import os
 
 from urllib3 import disable_warnings
 
-from apiritif.loadgen import ApiritifPlugin
+from apiist.loadgen import ApiritifPlugin
 
 disable_warnings()
 

@@ -1,5 +1,6 @@
-from apiritif import http
 from unittest import TestCase
+
+from apiist import http
 
 
 class TestRequests(TestCase):

@@ -23,8 +23,8 @@ from io import open
 from itertools import cycle, islice
 from chardet.universaldetector import UniversalDetector
 
-import apiritif.thread as thread
-from apiritif.utils import NormalShutdown
+import apiist.thread as thread
+from apiist.utils import NormalShutdown
 
 thread_data = threading.local()
 

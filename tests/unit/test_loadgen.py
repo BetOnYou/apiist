@@ -2,15 +2,15 @@ import copy
 import logging
 import os
 import tempfile
-import time
 import threading
-from unittest import TestCase
+import time
 from multiprocessing.pool import CLOSE
+from unittest import TestCase
 
-import apiritif
-from apiritif import store, thread
-from apiritif.samples import Sample
-from apiritif.loadgen import Worker, Params, Supervisor, JTLSampleWriter
+import apiist
+from apiist import store, thread
+from apiist.loadgen import JTLSampleWriter, Params, Supervisor, Worker
+from apiist.samples import Sample
 from tests.unit import RESOURCES_DIR
 
 dummy_tests = [os.path.join(RESOURCES_DIR, "test_dummy.py")]
@@ -51,7 +51,7 @@ class TestLoadGen(TestCase):
         worker.run_nose(params)
 
         # todo: fix result of "samples = self.apiritif_extractor.parse_recording(recording, sample)"
-        test_result = apiritif.get_from_thread_store('test_result')
+        test_result = apiist.get_from_thread_store('test_result')
         sample = ['1. setup1', '2. setup2', '3. main1', '4. main2', '5. teardown1', '6. teardown2']
         self.assertEqual(sample, test_result)
 
@@ -169,10 +169,10 @@ class TestLoadGen(TestCase):
         params.worker_count = 2
 
         params.iterations = 2
-        saved_get_handlers = apiritif.get_transaction_handlers
-        saved_set_handlers = apiritif.set_transaction_handlers
-        apiritif.get_transaction_handlers = mock_get_handlers
-        apiritif.set_transaction_handlers = mock_set_handlers
+        saved_get_handlers = apiist.get_transaction_handlers
+        saved_set_handlers = apiist.set_transaction_handlers
+        apiist.get_transaction_handlers = mock_get_handlers
+        apiist.set_transaction_handlers = mock_set_handlers
         try:
             sup = Supervisor(params)
             sup.start()
@@ -187,8 +187,8 @@ class TestLoadGen(TestCase):
             self.assertEqual(0, len([handler for handler in handlers if handler.endswith('2/2}')]))
 
         finally:
-            apiritif.get_transaction_handlers = saved_get_handlers
-            apiritif.set_transaction_handlers = saved_set_handlers
+            apiist.get_transaction_handlers = saved_get_handlers
+            apiist.set_transaction_handlers = saved_set_handlers
 
             os.remove(handlers_log)
             for i in range(params.worker_count):
@@ -362,8 +362,8 @@ class TestMultiprocessing(TestCase):
         params.worker_count = 15
 
         params.iterations = 1
-        saved_spawn_worker = apiritif.loadgen.spawn_worker
-        apiritif.loadgen.spawn_worker = mock_spawn_worker
+        saved_spawn_worker = apiist.loadgen.spawn_worker
+        apiist.loadgen.spawn_worker = mock_spawn_worker
 
         try:
             sup = Supervisor(params)
@@ -378,7 +378,7 @@ class TestMultiprocessing(TestCase):
             self.assertEqual(params.worker_count, len(set(process_ids)))
 
         finally:
-            apiritif.loadgen.spawn_worker = saved_spawn_worker
+            apiist.loadgen.spawn_worker = saved_spawn_worker
 
             for i in range(params.worker_count):
                 os.remove(params.report % i)

@@ -5,19 +5,19 @@ import sys
 import time
 import unittest
 
-import apiritif
+import apiist
 
 
 class TestTwoTransactions(unittest.TestCase):
 
     def first(self):
-        with apiritif.smart_transaction('1st'):
-            response = apiritif.http.get('https://blazedemo.com/')
+        with apiist.smart_transaction('1st'):
+            response = apiist.http.get('https://blazedemo.com/')
             response.assert_ok()
 
     def second(self):
-        with apiritif.smart_transaction('2nd'):
-            response = apiritif.http.get('https://blazedemo.com/vacation.html')
+        with apiist.smart_transaction('2nd'):
+            response = apiist.http.get('https://blazedemo.com/vacation.html')
 
     def test_simple(self):
         self.first()

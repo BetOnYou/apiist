@@ -1,25 +1,25 @@
-# Apiritif
+# Apiist
 
-Apiritif is a number of utilities aimed to simplify the process of maintaining API tests.
-Apiritif tests fully based on python nose tests. This library can help you to develop and run your existing tests.
-In order to create any valid tests for Apiritif you can read [nose test documentation](https://nose.readthedocs.io/en/latest/testing.html).
+Apiist is an [Apiritif forks](https://github.com/Blazemeter/apiritif). It also aims to simplify python api testing with a set of
+predefined assertions and request methods. The fork was motivated by the project lacks of apparence maintenance and the need to
+support testing using Async methods and Starlette test client related to a FastAPI usage.
 
-Check Apiritif version with the following command:
+Check Apiist version with the following command:
 
 ```
-python -m apiritif -- version
+python -m apiist -- version
 ```
 
-Here described some features of Apiritif which can help you to create tests more easily.  
+Here described some features of Apiist which can help you to create tests more easily.
 
 ## Overview
 
 ## HTTP Requests
 
-Apiritif allows to use simple `requests`-like API for making HTTP requests.
+Apiist allows to use simple `requests`-like API for making HTTP requests.
 
 ```python
-from apiritif import http
+from apiist import http
 
 response = http.get("http://example.com")
 response.assert_ok()  # will raise AssertionError if request wasn't successful
@@ -28,7 +28,7 @@ response.assert_ok()  # will raise AssertionError if request wasn't successful
 `http` object provides the following methods:
 
 ```python
-from apiritif import http
+from apiist import http
 
 http.get("http://api.example.com/posts")
 http.post("http://api.example.com/posts")
@@ -47,7 +47,7 @@ def get(address,               # URL for the request
         cookies=None,          # request cookies
         data=None,             # raw request data
         json=None,             # attach JSON object as request body
-        encrypted_cert=None,   # certificate to use with request 
+        encrypted_cert=None,   # certificate to use with request
         allow_redirects=True,  # automatically follow HTTP redirects
         timeout=30)            # request timeout, by default it's 30 seconds
 ```
@@ -69,7 +69,7 @@ Target is an object that captures resource name of the URL (protocol, domain, po
 and allows to set some settings applied to all requests made for a target.
 
 ```python
-from apiritif import http
+from apiist import http
 
 qa_env = http.target("http://192.160.0.2")
 qa_env.get("/api/v4/user")
@@ -79,7 +79,7 @@ qa_env.get("/api/v4/user")
 Target constructor supports the following options:
 
 ```python
-target = apiritif.http.target(
+target = apiist.http.target(
     address,               # target base address
     base_path=None,        # base path prepended to all paths (e.g. '/api/v2')
     use_cookies=True,      # use cookies
@@ -91,7 +91,7 @@ target = apiritif.http.target(
 
 ## Assertions
 
-Apiritif responses provide a lot of useful assertions that can be used on responses.
+Apiist responses provide a lot of useful assertions that can be used on responses.
 
 Here's the list of assertions that can be used:
 
@@ -162,7 +162,7 @@ response.assert_ok().assert_in_body("Example")
 
 ## Transactions
 
-Apiritif allows to group multiple requests or actions into a transaction using a `transaction` context manager.
+Apiist allows to group multiple requests or actions into a transaction using a `transaction` context manager.
 For example when we have test action like bellow we want to execute requests according to concrete user as a separate piece.
 Also we want to process test for `users/all` page even if something wrong with previous actions.
 
@@ -180,7 +180,7 @@ Here where we can use transaction in order to wrap login process in one block.
 
 ```python
 def test_with_login():
-    with apiritif.transaction('Login'):
+    with apiist.transaction('Login'):
         user_credentials = data_mock.get_my_user()
         http.get("https://blazedemo.com/user/login?id="+user_credentials.id).assert_ok()
         http.get("https://blazedemo.com/user/id/personalPage").assert_ok()
@@ -203,7 +203,7 @@ class Tests(TestCase):
     def test_available_pages():
         http.get("https://blazedemo.com/").assert_ok()
         http.get("https://blazedemo.com/users").assert_ok()
-    
+
         http.get("https://blazedemo.com/users/search").assert_ok()
         http.get("https://blazedemo.com/users/count").assert_ok()
         http.get("https://blazedemo.com/users/login").assert_ok()
@@ -218,15 +218,15 @@ For this purpose we can use `smart_transaction`.
 ```python
 class Tests(TestCase):
     def setUp(self):
-        apiritif.put_into_thread_store(func_mode=True)
-    
+        apiist.put_into_thread_store(func_mode=True)
+
     def test_available_pages():
         http.get("https://blazedemo.com/").assert_ok()
 
-        with apiritif.smart_transaction('Availability check'):
+        with apiist.smart_transaction('Availability check'):
             http.get("https://blazedemo.com/users").assert_ok()
-    
-        with apiritif.smart_transaction('Test users pages'):
+
+        with apiist.smart_transaction('Test users pages'):
             http.get("https://blazedemo.com/users/search").assert_ok()
             http.get("https://blazedemo.com/users/count").assert_ok()
             http.get("https://blazedemo.com/users/login").assert_ok()
@@ -239,9 +239,9 @@ Now this two blocks are wrapped into `smart_transaction` which would help with e
 
 Also each transaction defines the name for the block of code and will be displayed in the output report.
 
-Now about `apiritif.put_into_thread_store(func_mode=True)`, this is test execution mode for apiritif.
+Now about `apiist.put_into_thread_store(func_mode=True)`, this is test execution mode for apiist.
 We can execute all of the transactions in test no matter what or stop after first failed transaction.
-This flag tells to apiritif "Stop execution if some transaction failed". `False` says "Run till the end in any case".
+This flag tells to apiist "Stop execution if some transaction failed". `False` says "Run till the end in any case".
 
 ##### Nose Flow Control
 
@@ -254,7 +254,7 @@ def test_flow-control(self):
             self._method_with_exception()
             self._skipped_method()
         finally:
-            apiritif.set_stage("teardown")
+            apiist.set_stage("teardown")
             self._teardown1()
             self._teardown2()
 ```
@@ -263,21 +263,21 @@ If this test will be interrupted in `_method_with_exception`, both of teardown m
 Please note two differences with usage of `tearDown` method of nose:
 
 1. all parts of teardown stage will be executed as mentioned above (will be interrupted in regular nose execution)
-2. results of teardown steps will be written by apiritif SampleWriter into output file (nose lost them as tearDown isn't recognised as test).
+2. results of teardown steps will be written by apiist SampleWriter into output file (nose lost them as tearDown isn't recognised as test).
 
 ##### Graceful shutdown
 
 Somethimes waiting of end of test isn't necessary and we prefer to break it but save all current results and handle all teardown steps. (see above)
-It's possible with GRACEFUL flag. To use it you can run apiritif with GRACEFUL environment variable pointed to any file name.
-Apiritif will be interrupted as soon as the file is created.
+It's possible with GRACEFUL flag. To use it you can run apiist with GRACEFUL environment variable pointed to any file name.
+Apiist will be interrupted as soon as the file is created.
 
 ## CSV Reader
 
-In order to use data from csv file as test parameters Apiritif provides two different csv readers.
+In order to use data from csv file as test parameters Apiist provides two different csv readers.
 Simple `CSVReader` helps you to read data from file line by line and use this data wherever you need:
 
 ```python
-data_reader = apiritif.CSVReader('---path to required file---')
+data_reader = apiist.CSVReader('---path to required file---')
 class Tests(TestCase):
     def test_user_page():
         data_reader.read_vars()
@@ -289,19 +289,19 @@ In case of multithreading testing you may need to deviate data between threads a
 `CSVReaderPerThread` helps to solve this problem:
 
 ```python
-data_per_thread_reader = apiritif.CSVReaderPerThread('---path to required file---')
+data_per_thread_reader = apiist.CSVReaderPerThread('---path to required file---')
 class Tests(TestCase):
     def setUp(self):
         data_per_thread_reader.read_vars()
         self.vars = data_per_thread_reader.get_vars()
-    
+
     def test_user_page():
         http.get("https://blazedemo.com/users/" + self.vars.user_id).assert_ok()
 ```
 
 ## Execution results
 
-Apiritif writes output data from tests in `apiritif.#.csv` files by default. Here `#` is number of executing process.
+Apiist writes output data from tests in `apiist.#.csv` files by default. Here `#` is number of executing process.
 The output file is similar to this:
 
 ```csv
@@ -309,7 +309,7 @@ timeStamp,elapsed,Latency,label,responseCode,responseMessage,success,allThreads,
 1602759519185,0,0,Correct test,,,true,0,2
 1602759519186,0,0,Correct transaction,,,true,0,2
 1602759519187,0,0,Test with exception,,Exception: Horrible error,false,0,2
-```  
+```
 
 It contains test and transaction results for executed tests by one process.
 
@@ -317,5 +317,5 @@ It contains test and transaction results for executed tests by one process.
 
 There are environment variables to control length of response/request body to be written into traces and logs:
 
-  * `APIRITIF_TRACE_BODY_EXCLIMIT` - limit of body part to include into exception messages, default is 1024
-  * `APIRITIF_TRACE_BODY_HARDLIMIT` - limit of body length to include into JSON trace records, default is unlimited
+  * `APIIST_TRACE_BODY_EXCLIMIT` - limit of body part to include into exception messages, default is 1024
+  * `APIIST_TRACE_BODY_HARDLIMIT` - limit of body length to include into JSON trace records, default is unlimited

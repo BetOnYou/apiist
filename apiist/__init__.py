@@ -1,5 +1,5 @@
 """
-This is a toplevel package of Apiritif tool
+This is a toplevel package of Apiist tool
 Copyright 2017 BlazeMeter Inc.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,3 +22,5 @@ from .thread import (external_handler, get_from_thread_store, get_iteration,
                      set_transaction_handlers)
 from .utilities import *
 from .utils import assert_not_regexp, assert_regexp, headers_as_text, log
+
+all = [CSVReaderPerThread,put_into_thread_store, get_from_thread_store, external_handler,  get_stage,set_stage, get_transaction_handlers,set_transaction_handlers, get_iteration,http,Assertion,AssertionFailure  ]

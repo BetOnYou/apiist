@@ -1,9 +1,8 @@
+import re
 import unittest
 from datetime import datetime
 
-import re
-
-from apiritif import utilities
+from apiist import utilities
 
 
 class TestUtilities(unittest.TestCase):

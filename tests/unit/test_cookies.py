@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from apiritif import http
+from apiist import http
 
 
 class TestCookies(TestCase):

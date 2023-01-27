@@ -1,10 +1,10 @@
 import os
+from unittest import TestCase
 
 import OpenSSL
-from unittest import TestCase
-from apiritif.http import http
-from apiritif import ssl_adapter
 
+from apiist import ssl_adapter
+from apiist.http import http
 from tests.unit import RESOURCES_DIR
 
 

@@ -1,4 +1,14 @@
+pytest
 black
+bandit
+coverage
+faker
 flake8
+mypy  # linting on types
+isort
 starlette
 fastapi
+codecov
+nose-exclude
+nose-timer
+pluggy>=1.0

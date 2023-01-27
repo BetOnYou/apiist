@@ -19,8 +19,8 @@ import copy
 import os
 import traceback
 
-import apiritif
-from apiritif.http import RequestFailure
+import apiist
+from apiist.http import RequestFailure
 
 
 class Assertion(object):
@@ -144,17 +144,17 @@ class ApiritifSampleExtractor(object):
         """
         self.active_transactions.append(test_case_sample)
         for item in recording:
-            if isinstance(item, apiritif.Request):
+            if isinstance(item, apiist.Request):
                 self._parse_request(item)
-            elif isinstance(item, apiritif.TransactionStarted):
+            elif isinstance(item, apiist.TransactionStarted):
                 self._parse_transaction_started(item)
-            elif isinstance(item, apiritif.TransactionEnded):
+            elif isinstance(item, apiist.TransactionEnded):
                 self._parse_transaction_ended(item)
-            elif isinstance(item, apiritif.Assertion):
+            elif isinstance(item, apiist.Assertion):
                 self._parse_assertion(item)
-            elif isinstance(item, apiritif.AssertionFailure):
+            elif isinstance(item, apiist.AssertionFailure):
                 self._parse_assertion_failure(item)
-            elif isinstance(item, apiritif.Event):
+            elif isinstance(item, apiist.Event):
                 self._parse_generic_event(item)
             else:
                 raise ValueError("Unknown kind of event in apiritif recording: %s" % item)

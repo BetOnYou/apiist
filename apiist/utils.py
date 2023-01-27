@@ -19,7 +19,7 @@ import re
 import logging
 import traceback
 
-VERSION = "1.1.3"
+VERSION = "1.0.0"
 
 log = logging.getLogger('apiritif')
 

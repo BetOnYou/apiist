@@ -16,7 +16,7 @@ limitations under the License.
 """
 from threading import local
 
-from apiritif.action_plugins import BaseActionHandler
+from apiist.action_plugins import BaseActionHandler
 
 _total = 1
 _thread_local = local()

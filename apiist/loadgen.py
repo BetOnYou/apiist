@@ -30,11 +30,11 @@ from threading import Thread
 from nose2.main import PluggableTestProgram
 from nose2.events import Plugin
 
-import apiritif
-import apiritif.thread as thread
-import apiritif.store as store
-from apiritif.action_plugins import ActionHandlerFactory, import_plugins
-from apiritif.utils import NormalShutdown, log, get_trace, VERSION, graceful
+import apiist
+import apiist.thread as thread
+import apiist.store as store
+from apiist.action_plugins import ActionHandlerFactory, import_plugins
+from apiist.utils import NormalShutdown, log, get_trace, VERSION, graceful
 
 
 # TODO how to implement hits/s control/shape?
@@ -425,7 +425,7 @@ class ApiritifPlugin(Plugin):
 
     def __init__(self):
         self.controller = store.SampleController(log=log, session=self.session)
-        apiritif.put_into_thread_store(controller=self.controller)
+        apiist.put_into_thread_store(controller=self.controller)
 
     def startTest(self, event):
         """
@@ -535,7 +535,7 @@ def cmdline_to_params():
 
 def setup_logging(params):
     logformat = "%(asctime)s:%(levelname)s:%(process)s:%(thread)s:%(name)s:%(message)s"
-    apiritif.http.log.setLevel(logging.WARNING)
+    apiist.http.log.setLevel(logging.WARNING)
     if params.verbose:
         logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format=logformat)
     else:

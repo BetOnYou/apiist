@@ -1,9 +1,9 @@
+import sys
 import threading
 import time
-import sys
-
 from unittest import TestCase
-from apiritif.http import _EventRecorder, Event
+
+from apiist.http import Event, _EventRecorder
 
 
 class EventGenerator(threading.Thread):

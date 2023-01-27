@@ -11,9 +11,10 @@ from _pytest.reports import TestReport
 from _pytest.runner import CallInfo
 from pluggy._result import _Result
 
-import apiritif
-from apiritif import http
-from apiritif.pytest_plugin import pytest_addoption, pytest_configure, pytest_unconfigure, ApiritifPytestPlugin
+import apiist
+from apiist import http
+from apiist.pytest_plugin import (ApiritifPytestPlugin, pytest_addoption,
+                                  pytest_configure, pytest_unconfigure)
 
 ctype = namedtuple("config", ["option", "pluginmanager", "getoption"])
 otype = namedtuple("option", ["apiritif_trace", "apiritif_trace_detail"])
@@ -64,7 +65,7 @@ class TestHTTPMethods(TestCase):
         tmp.close()
 
         with fake_process(tmp.name):
-            with apiritif.transaction("tran"):
+            with apiist.transaction("tran"):
                 pass
 
         with open(tmp.name) as fp:
@@ -77,7 +78,7 @@ class TestHTTPMethods(TestCase):
         tmp.close()
 
         with fake_process(tmp.name):
-            with apiritif.transaction("tran") as tran:
+            with apiist.transaction("tran") as tran:
                 tran.set_request(bytes("test", 'utf8'))
 
             http.post('http://httpbin.org/post', data=bytes([0xa0, 1, 2, 3]),

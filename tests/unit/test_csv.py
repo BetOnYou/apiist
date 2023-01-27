@@ -1,12 +1,11 @@
 import os
 import tempfile
-
 from unittest import TestCase
 
-from apiritif import thread
-from apiritif.loadgen import Params, Supervisor
-from apiritif.csv import CSVReaderPerThread, thread_data
-from apiritif.utils import NormalShutdown
+from apiist import thread
+from apiist.csv import CSVReaderPerThread, thread_data
+from apiist.loadgen import Params, Supervisor
+from apiist.utils import NormalShutdown
 from tests.unit import RESOURCES_DIR
 
 

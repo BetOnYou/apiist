@@ -1,10 +1,9 @@
 import os
 import unittest
 
-
-import apiritif
-from apiritif.thread import get_index
-from apiritif.csv import CSVReaderPerThread
+import apiist
+from apiist.csv import CSVReaderPerThread
+from apiist.thread import get_index
 
 reader0 = CSVReaderPerThread(os.path.join(os.path.dirname(__file__), "data/source0.csv"), quoted=True)
 reader1 = CSVReaderPerThread(os.path.join(os.path.dirname(__file__), "data/source1.csv"),
@@ -15,7 +14,7 @@ reader1 = CSVReaderPerThread(os.path.join(os.path.dirname(__file__), "data/sourc
 def log_it(name, data):
     variables = ":".join((data["name"], data["pass"], data["name+"], data["pass+"]))
     log_line = "%s-%s. %s\n" % (get_index(), name, variables)
-    with apiritif.transaction(log_line):    # write log_line into report file for checking purposes
+    with apiist.transaction(log_line):    # write log_line into report file for checking purposes
         pass
 
 

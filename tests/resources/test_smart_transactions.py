@@ -1,7 +1,8 @@
 # coding=utf-8
 import unittest
-import apiritif
-from apiritif import get_transaction_handlers, set_transaction_handlers
+
+import apiist
+from apiist import get_transaction_handlers, set_transaction_handlers
 
 
 def add_dummy_handlers():
@@ -36,20 +37,20 @@ class TestSmartTransactions(unittest.TestCase):
 
         }
 
-        apiritif.put_into_thread_store(
+        apiist.put_into_thread_store(
             driver=self.driver,
             func_mode=False)  # don't stop after failed test case
 
     def _1_t1(self):
-        with apiritif.smart_transaction('t1'):
+        with apiist.smart_transaction('t1'):
             self.driver.get('addr1')
 
     def _2_t2(self):
-        with apiritif.smart_transaction('t2'):
+        with apiist.smart_transaction('t2'):
             self.driver.get('addr2')
 
     def _3_t3(self):
-        with apiritif.smart_transaction('t3'):
+        with apiist.smart_transaction('t3'):
             self.driver.get('addr3')
 
     def test_smartTransactions(self):

@@ -28,12 +28,11 @@ from jsonpath_ng.ext import parse as jsonpath_parse
 from lxml import etree, html
 from requests.structures import CaseInsensitiveDict
 
-import apiritif
-from apiritif.ssl_adapter import SSLAdapter
-from apiritif.thread import get_from_thread_store, put_into_thread_store
-from apiritif.utilities import *
-from apiritif.utils import (NormalShutdown, assert_not_regexp, assert_regexp,
-                            get_trace, graceful, headers_as_text, log)
+import apiist
+from apiist.ssl_adapter import SSLAdapter
+from apiist.thread import get_from_thread_store, put_into_thread_store
+from apiist.utilities import *
+from apiist.utils import headers_as_text, assert_regexp, assert_not_regexp, log, get_trace, NormalShutdown, graceful
 
 BODY_LIMIT = int(os.environ.get("APIRITIF_TRACE_BODY_EXCLIMIT", "1024"))
 
@@ -101,10 +100,10 @@ class HTTP(object):
             headers = {}
         if "User-Agent" not in headers:
             headers["User-Agent"] = "Apiritif"
-        
+
         session = None
         prepared = None
-        
+
         if session is None and self.__support_session:
             session = requests.Session()
 
@@ -241,9 +240,9 @@ class HTTP(object):
 
         if "User-Agent" not in headers:
             headers["User-Agent"] = "Apiritif"
-        
+
         prepared = None
-        
+
         # if session is None and self.__support_session:
         #     session = requests.Session()
 
@@ -344,7 +343,7 @@ class HTTP(object):
     async def async_connect(self, address, **kwargs):
         return await self.async_request("CONNECT", address, **kwargs)
 
-      
+
 http = HTTP()
 
 
@@ -447,7 +446,7 @@ class smart_transaction(transaction_logged):
 
         super(smart_transaction, self).__enter__()
         put_into_thread_store(test_case=self.name, test_suite=self.test_suite)
-        for func in apiritif.get_transaction_handlers()["enter"]:
+        for func in apiist.get_transaction_handlers()["enter"]:
             func()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -473,12 +472,12 @@ class smart_transaction(transaction_logged):
             self.controller.addSuccess(is_transaction=True)
 
         put_into_thread_store(status=status, message=message)
-        for func in apiritif.get_transaction_handlers()["exit"]:
+        for func in apiist.get_transaction_handlers()["exit"]:
             func()
 
         self.controller.stopTest(is_transaction=True)
 
-        stage = apiritif.get_stage()
+        stage = apiist.get_stage()
         if stage == "teardown":
             self.func_mode = False
         elif graceful():  # and stage in ("setup", "main")

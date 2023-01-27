@@ -1,10 +1,10 @@
 import logging
+import threading
 import time
 import unittest
-import threading
-import apiritif
 
-from apiritif import http, transaction, transaction_logged, smart_transaction
+import apiist
+from apiist import http, smart_transaction, transaction, transaction_logged
 
 target = http.target('https://httpbin.org')
 target.keep_alive(True)
@@ -104,8 +104,8 @@ class TransactionThread(threading.Thread):
         super(TransactionThread, self).__init__(target=self._run_transaction)
 
     def _run_transaction(self):
-        apiritif.put_into_thread_store(driver=self.driver, func_mode=False, controller=self.controller)
-        apiritif.set_transaction_handlers({'enter': [self._enter_handler], 'exit': [self._exit_handler]})
+        apiist.put_into_thread_store(driver=self.driver, func_mode=False, controller=self.controller)
+        apiist.set_transaction_handlers({'enter': [self._enter_handler], 'exit': [self._exit_handler]})
 
         tran = smart_transaction(self.thread_name)
         with tran:
@@ -113,7 +113,7 @@ class TransactionThread(threading.Thread):
             self.transaction_controller = tran.controller
             raise Exception(self.exception_message)
 
-        self.message_from_thread_store = apiritif.get_from_thread_store('message')
+        self.message_from_thread_store = apiist.get_from_thread_store('message')
 
     def _enter_handler(self):
         pass

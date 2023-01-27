@@ -1,13 +1,13 @@
 import os
-from unittest import TestCase
-import tempfile
 import shutil
+import tempfile
+from unittest import TestCase
 
-import apiritif
-from apiritif import thread
-
-from apiritif.action_plugins import PLUGINS_PATH, import_plugins, ActionHandlerFactory, BaseActionHandler
-from apiritif.loadgen import Worker, Params
+import apiist
+from apiist import thread
+from apiist.action_plugins import (PLUGINS_PATH, ActionHandlerFactory,
+                                   BaseActionHandler, import_plugins)
+from apiist.loadgen import Params, Worker
 from tests.unit import RESOURCES_DIR
 from tests.unit.test_loadgen import dummy_tests
 
@@ -54,8 +54,8 @@ class TestRequests(TestCase):
 
     def test_external_handler(self):
         plugins = ActionHandlerFactory.create_all()
-        apiritif.put_into_thread_store(action_handlers=plugins)
-        apiritif.external_handler('session_id', BaseActionHandler.YAML_ACTION_START, 'data')
+        apiist.put_into_thread_store(action_handlers=plugins)
+        apiist.external_handler('session_id', BaseActionHandler.YAML_ACTION_START, 'data')
         plugin = plugins.pop(0)
         self.assertEquals(
             ('session_id', BaseActionHandler.YAML_ACTION_START, 'data'),
