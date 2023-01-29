@@ -139,10 +139,6 @@ jobs:
 
       - uses: actions/download-artifact@master
         with:
-          name: integ-coverage
-
-      - uses: actions/download-artifact@master
-        with:
           name: unit-coverage
 
       - name: Combine cover reports

@@ -1,5 +1,7 @@
 # Apiist
 
+[![build](https://github.com/BetOnYou/apiist/actions/workflows/branches.yaml/badge.svg)](https://github.com/BetOnYou/apiist/actions/workflows/branches.yaml)[![Coverage Status](https://coveralls.io/repos/github/BetOnYou/apiist/badge.svg?branch=main)](https://coveralls.io/github/BetOnYou/apiist?branch=main)
+
 Apiist is an [Apiritif forks](https://github.com/Blazemeter/apiritif). It also aims to simplify python api testing with a set of
 predefined assertions and request methods. The fork was motivated by the project lacks of apparence maintenance and the need to
 support testing using Async methods and Starlette test client related to a FastAPI usage.
