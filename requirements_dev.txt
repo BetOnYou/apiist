@@ -19,3 +19,5 @@ types-pyOpenSSL
 unittest2
 nose2
 httpx
+twine
+wheel
