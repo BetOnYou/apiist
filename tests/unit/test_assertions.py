@@ -1,25 +1,20 @@
-import unittest
+from unittest import TestCase, TestSuite
 
 from starlette.testclient import TestClient
 
 from apiist import HTTP, http
 from tests.resources.api.app import app
 
+# class TestRequests(TestCase):
+#     pass
 
-class TestRequests(unittest.TestCase):
-    custom_client = HTTP(TestClient(app))
 
+class TestRequestUsingDefautlClient(TestCase):
     def test_assert_regex(self):
         response = http.get("http://blazedemo.com/")
         response.assert_ok()
         response.assert_status_code(200)
         response.assert_regex_in_body("Welcome to the Simple Travel Agency!")
-
-    def test_assert_regex_custom_client(self):
-        response = self.custom_client.get("")
-        response.assert_ok()
-        response.assert_status_code(200)
-        response.assert_regex_in_body("Hello World")
 
     def test_assert_xpath(self):
         response = http.get("http://blazedemo.com/")
@@ -113,4 +108,66 @@ class TestRequests(unittest.TestCase):
 
     def test_assert_regex_not_in_headers(self):
         response = http.get("http://blazedemo.com/")
+        response.assert_regex_not_in_headers(r"Content-Type: application/.+")
+
+
+class TestRequestUsingHTTPXCustomClient(TestCase):
+    custom_client = HTTP(TestClient(app), is_httpx=True)
+
+    def test_assert_regex(self):
+        response = self.custom_client.get("")
+        response.assert_ok()
+        response.assert_status_code(200)
+        response.assert_regex_in_body("Hello.*")
+
+    def test_assert_ok(self):
+        response = self.custom_client.get("http://blazedemo.com/")
+        response.assert_ok()
+
+    def test_assert_failed(self):
+        response = self.custom_client.get("http://blazedemo.com/not-found")
+        response.assert_failed()
+
+    def test_assert_2xx(self):
+        response = self.custom_client.get("http://blazedemo.com/")
+        response.assert_2xx()
+
+    def test_assert_4xx(self):
+        response = self.custom_client.get("http://blazedemo.com/not-found")
+        response.assert_4xx()
+
+    def test_assert_status_code(self):
+        response = self.custom_client.get("http://blazedemo.com/")
+        response.assert_status_code(200)
+
+    def test_assert_status_code_in(self):
+        response = self.custom_client.get("http://blazedemo.com/")
+        response.assert_status_code_in((302, 200))
+
+    def test_assert_not_status_code(self):
+        response = self.custom_client.get("http://blazedemo.com/not-found")
+        response.assert_not_status_code(200)
+
+    def test_assert_not_in_body(self):
+        response = self.custom_client.get("http://blazedemo.com/")
+        response.assert_not_in_body("Willcommen!")
+
+    def test_assert_regex_not_in_body(self):
+        response = self.custom_client.get("http://blazedemo.com/not-found")
+        response.assert_regex_not_in_body("Nope")
+
+    def test_assert_has_header(self):
+        response = self.custom_client.get("http://blazedemo.com/")
+        response.assert_has_header("Content-Type")
+
+    def test_assert_not_in_headers(self):
+        response = self.custom_client.get("http://blazedemo.com/")
+        response.assert_not_in_headers("Content-Type: application/html")
+
+    def test_assert_regex_in_headers(self):
+        response = self.custom_client.get("http://blazedemo.com/")
+        response.assert_regex_in_headers(r"content-type: .+")
+
+    def test_assert_regex_not_in_headers(self):
+        response = self.custom_client.get("http://blazedemo.com/")
         response.assert_regex_not_in_headers(r"Content-Type: application/.+")

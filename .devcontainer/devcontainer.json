@@ -9,25 +9,25 @@
   "shutdownAction": "stopCompose",
   "postCreateCommand": "cd dev_env/gitutils && ./install.sh && git config --global pull.rebase true",
   "extensions": [
-	"ms-python.vscode-pylance",
-	"visualstudioexptteam.vscodeintellicode",
-	"redhat.vscode-yaml",
-	"ryanluker.vscode-coverage-gutters",
-	"oderwat.indent-rainbow",
-	"mikestead.dotenv",
-	"alanwalk.markdown-toc",
-	"darkriszty.markdown-table-prettify",
-	"ms-python.python",
-	"2gua.rainbow-brackets",
-	"brainfit.vscode-importmagic",
-	"littlefoxteam.vscode-python-test-adapter",
-	"davidanson.vscode-markdownlint",
-	"eamodio.gitlens",
-	"shakram02.bash-beautify",
-	"markis.code-coverage",
-	"VisualStudioExptTeam.vscodeintellicode",
-	"hbenl.vscode-test-explorer"
-],
+    "ms-python.vscode-pylance",
+    "visualstudioexptteam.vscodeintellicode",
+    "redhat.vscode-yaml",
+    "ryanluker.vscode-coverage-gutters",
+    "oderwat.indent-rainbow",
+    "mikestead.dotenv",
+    "alanwalk.markdown-toc",
+    "darkriszty.markdown-table-prettify",
+    "ms-python.python",
+    "2gua.rainbow-brackets",
+    "brainfit.vscode-importmagic",
+    "littlefoxteam.vscode-python-test-adapter",
+    "davidanson.vscode-markdownlint",
+    "eamodio.gitlens",
+    "shakram02.bash-beautify",
+    "markis.code-coverage",
+    "VisualStudioExptTeam.vscodeintellicode",
+    "hbenl.vscode-test-explorer"
+  ],
   "settings": {
     "python.linting.flake8Enabled": true,
     "python.linting.mypyEnabled": true,
@@ -42,12 +42,15 @@
     "terminal.integrated.profiles.linux": {
       "zsh": {
         "path": "/usr/bin/zsh",
-        "args": ["-l"]
+        "args": [
+          "-l"
+        ]
       }
     },
-
     "python.linting.banditEnabled": true,
-    "python.formatting.blackArgs": ["--line-length=99"],
+    "python.formatting.blackArgs": [
+      "--line-length=99"
+    ],
     "coverage-gutters.coverageReportFileName": "coverage/index.html",
     "coverage-gutters.showLineCoverage": true,
     "coverage-gutters.showRulerCoverage": true,
@@ -61,6 +64,5 @@
       }
     },
     "files.eol": "\n"
-
   }
 }

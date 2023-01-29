@@ -16,3 +16,6 @@ pluggy>=1.0
 types-chardet
 types-requests
 types-pyOpenSSL
+unittest2
+nose2
+httpx

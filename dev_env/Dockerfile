@@ -21,7 +21,7 @@ USER vscode
 
 WORKDIR /home/app
 
-ENV PATH="/home/vscode/venv/bin:$PATH"
+ENV PATH="/home/app/venv/bin:$PATH"
 ENV TERM xterm
 
 
@@ -33,8 +33,7 @@ RUN python3 -m venv venv \
     && . venv/bin/activate \
     && pip install --upgrade pip \
     && pip install -r requirements_dev.txt \
-    && pip install -r requirements.txt \
-    && mv venv /home/vscode
+    && pip install -r requirements.txt
 
 RUN mkdir /home/vscode/commandhistory && touch /home/vscode/commandhistory/.zsh_history
 
